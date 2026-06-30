@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lugano | Pedidos</title>
+    <link rel="stylesheet" href="./styles.css?v=checkout-20260621-1" />
+  </head>
+  <body>
+    <header class="page-hero">
+      <nav class="nav">
+        <a class="brand" href="../landing/index.html">
+          <span class="brand-mark">L</span>
+          <span>
+            <strong>Lugano</strong>
+            <small>Delivery</small>
+          </span>
+        </a>
+        <div class="nav-session">
+          <span id="session-label">Visitante</span>
+          <button class="ghost-button hidden" id="logout-button" type="button">Sair</button>
+        </div>
+      </nav>
+      <div class="hero-copy">
+        <span>Delivery Lugano</span>
+        <h1>Seu café, chocolate e sobremesa a caminho.</h1>
+        <p>Escolha os favoritos da Lugano, confirme a entrega e acompanhe seu pedido.</p>
+        <div class="delivery-hero-actions">
+          <a href="#product-grid">Ver cardápio</a>
+          <a href="#checkout-button">Finalizar pedido</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="delivery-layout">
+      <section class="menu-column">
+        <div class="notice hidden" id="notice"></div>
+
+        <section class="delivery-status" aria-label="Resumo do delivery">
+          <div>
+            <span>Modo de compra</span>
+            <strong>Delivery</strong>
+          </div>
+          <div>
+            <span>Preparo estimado</span>
+            <strong>25-40 min</strong>
+          </div>
+          <div>
+            <span>Atendimento</span>
+            <strong>Cafeteria e chocolateria</strong>
+          </div>
+        </section>
+
+        <section class="delivery-strip">
+          <div><strong>1. Escolha</strong><span>Selecione produtos do cardapio</span></div>
+          <div><strong>2. Revise</strong><span>Confira carrinho, cupom e entrega</span></div>
+          <div><strong>3. Envie</strong><span>O pedido segue para preparo</span></div>
+        </section>
+
+        <section class="menu-heading">
+          <div>
+            <span class="section-kicker">Cardápio delivery</span>
+            <h2>Monte seu pedido</h2>
+            <p>Escolha os produtos e envie para preparo.</p>
+          </div>
+          <div class="toolbar">
+            <select id="category-filter" aria-label="Filtrar categoria">
+              <option value="">Todas as categorias</option>
+            </select>
+            <button class="ghost-button" id="refresh-products" type="button">Atualizar</button>
+          </div>
+        </section>
+
+        <div class="product-grid" id="product-grid"></div>
+      </section>
+
+      <aside class="checkout-column" aria-label="Checkout do delivery">
+        <section class="checkout-panel checkout-main">
+          <div class="checkout-title">
+            <h2>Pedido</h2>
+            <span id="cart-count">0 itens</span>
+          </div>
+          <div class="cart-list" id="cart-list"></div>
+          <div class="totals">
+            <div><span>Subtotal</span><strong id="cart-subtotal">R$ 0,00</strong></div>
+            <div><span>Entrega</span><strong id="cart-delivery">R$ 0,00</strong></div>
+            <div><span>Desconto</span><strong id="cart-discount">R$ 0,00</strong></div>
+            <div class="grand-total"><span>Total estimado</span><strong id="cart-total">R$ 0,00</strong></div>
+          </div>
+          <p class="checkout-note" id="free-delivery-hint"></p>
+        </section>
+
+        <section class="checkout-panel session-panel">
+          <h2>Identificação</h2>
+          <p class="muted" id="auth-summary">Nenhuma conta conectada.</p>
+          <a class="primary-button" href="../client/#/acesso" target="_top">Ir para Acesso</a>
+        </section>
+
+        <section class="checkout-panel">
+          <h2>Entrega</h2>
+          <label>Endereço salvo
+            <select id="address-select" aria-label="Endereço de entrega"></select>
+          </label>
+          <p class="selection-summary" id="address-summary">Selecione ou cadastre um endereÃ§o.</p>
+          <details>
+            <summary>Novo endereço</summary>
+            <form id="address-form">
+              <label>Apelido<input name="label" value="Casa" required /></label>
+              <label>Rua<input name="street" required /></label>
+              <label>Número<input name="number" required /></label>
+              <label>Bairro<input name="neighborhood" required /></label>
+              <label>Cidade<input name="city" required /></label>
+              <label>CEP<input name="zip_code" required /></label>
+              <label>Complemento<input name="complement" /></label>
+              <button class="ghost-button" type="submit">Salvar endereço</button>
+            </form>
+          </details>
+        </section>
+
+        <section class="checkout-panel">
+          <h2>Pagamento</h2>
+          <label>Cupom<input id="promotion-code" placeholder="LUGANO10" /></label>
+          <div class="button-row">
+            <button class="ghost-button" id="validate-promotion" type="button">Aplicar cupom</button>
+            <button class="ghost-button" id="clear-promotion" type="button">Remover</button>
+          </div>
+          <p class="selection-summary" id="promotion-summary">Nenhum cupom aplicado.</p>
+          <label>Forma de pagamento
+            <select id="payment-method">
+              <option value="pix">Pix</option>
+              <option value="credit_card">Cartão de crédito</option>
+              <option value="debit_card">Cartão de débito</option>
+              <option value="cash">Dinheiro</option>
+            </select>
+          </label>
+          <p class="selection-summary" id="payment-summary">Pagamento via Pix.</p>
+          <label>Observações<textarea id="order-notes" rows="3"></textarea></label>
+          <button class="primary-button checkout-button" id="checkout-button" type="button">
+            Revisar pedido
+          </button>
+        </section>
+
+        <section class="checkout-panel hidden" id="last-order-panel">
+          <h2>Status do pedido</h2>
+          <div class="last-order-card">
+            <span class="status pending" id="last-order-status">pending</span>
+            <strong id="last-order-title">Pedido enviado</strong>
+            <p class="muted" id="last-order-summary"></p>
+          </div>
+          <div class="payment-instructions hidden" id="payment-instructions">
+            <strong id="payment-instructions-title">Pagamento</strong>
+            <p id="payment-instructions-description"></p>
+            <div class="pix-copy-box hidden" id="pix-copy-box">
+              <span>Pix copia e cola</span>
+              <textarea id="pix-copy-paste" rows="5" readonly></textarea>
+              <button class="ghost-button" id="copy-pix" type="button">Copiar Pix</button>
+            </div>
+          </div>
+          <div class="order-progress" id="order-progress"></div>
+        </section>
+
+        <details class="checkout-panel connection-panel">
+          <summary>Configuração técnica</summary>
+          <form id="connection-form">
+            <label>API base URL<input name="apiBaseUrl" value="http://127.0.0.1:8000" /></label>
+            <label>Supabase URL<input name="supabaseUrl" /></label>
+            <label>Supabase anon key<input name="supabaseAnonKey" type="password" /></label>
+            <button class="ghost-button" type="submit">Salvar conexão</button>
+          </form>
+        </details>
+
+      </aside>
+    </main>
+
+    <div class="modal-backdrop hidden" id="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <section class="confirm-modal">
+        <h2 id="confirm-title">Confirmar pedido</h2>
+        <div class="confirm-list" id="confirm-summary"></div>
+        <div class="button-row">
+          <button class="ghost-button" id="cancel-confirmation" type="button">Voltar</button>
+          <button class="primary-button" id="confirm-order" type="button">Confirmar e enviar</button>
+        </div>
+      </section>
+    </div>
+
+    <script src="../config.js?v=config-20260625-1"></script>
+    <script src="./app.js?v=checkout-20260625-1"></script>
+  </body>
+</html>

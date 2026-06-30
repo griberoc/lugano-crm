@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lugano | Acesso</title>
+    <link rel="stylesheet" href="./styles.css?v=auth-route-20260620-1" />
+  </head>
+  <body>
+    <header class="auth-hero">
+      <nav class="topnav">
+        <a class="brand" href="../landing/index.html">
+          <span class="brand-mark">L</span>
+          <span>
+            <strong>Lugano</strong>
+            <small>Acesso do Cliente</small>
+          </span>
+        </a>
+        <div class="session-actions">
+          <span id="session-label">Visitante</span>
+          <button class="ghost-button hidden" id="logout-button" type="button">Sair</button>
+        </div>
+      </nav>
+      <div class="hero-copy">
+        <span>Conta Lugano</span>
+        <h1>Entre ou crie sua conta.</h1>
+        <p>Acesse seu painel, acompanhe beneficios e finalize pedidos no delivery.</p>
+      </div>
+    </header>
+
+    <main class="auth-layout">
+      <section class="auth-card">
+        <div class="notice hidden" id="notice"></div>
+
+        <div class="auth-tabs" role="tablist" aria-label="Acesso do cliente">
+          <button class="auth-tab active" id="show-login" type="button">Entrar</button>
+          <button class="auth-tab" id="show-signup" type="button">Criar conta</button>
+        </div>
+
+        <form id="login-form">
+          <div>
+            <h2>Entrar</h2>
+            <p>Use seu email e senha cadastrados na Lugano.</p>
+          </div>
+          <label>Email<input name="email" type="email" autocomplete="email" required /></label>
+          <label>Senha<input name="password" type="password" autocomplete="current-password" required /></label>
+          <button class="primary-button" type="submit">Entrar</button>
+        </form>
+
+        <form class="hidden" id="signup-form">
+          <div>
+            <h2>Criar conta</h2>
+            <p>Seu cadastro libera pedidos, pontos e promocoes do programa.</p>
+          </div>
+          <label>Nome<input name="full_name" autocomplete="name" required /></label>
+          <label>Telefone<input name="phone" autocomplete="tel" /></label>
+          <label>Email<input name="email" type="email" autocomplete="email" required /></label>
+          <label>Senha<input name="password" type="password" autocomplete="new-password" minlength="6" required /></label>
+          <label>Confirmar senha<input name="password_confirm" type="password" autocomplete="new-password" minlength="6" required /></label>
+          <button class="primary-button" type="submit">Criar conta</button>
+        </form>
+
+        <section class="session-panel" id="session-panel">
+          <h2>Sessao atual</h2>
+          <p id="session-summary">Nenhuma conta conectada.</p>
+          <div class="quick-actions">
+            <a class="ghost-link" href="../client/#/painel" target="_top">Abrir painel</a>
+            <a class="ghost-link" href="../client/#/delivery" target="_top">Fazer pedido</a>
+          </div>
+        </section>
+      </section>
+
+      <aside class="support-column">
+        <section class="panel">
+          <h2>O que essa conta libera?</h2>
+          <ul>
+            <li>Acompanhar ultimos pedidos.</li>
+            <li>Participar do programa de fidelidade.</li>
+            <li>Receber promocoes disponiveis para seu nivel.</li>
+            <li>Salvar enderecos para o delivery.</li>
+          </ul>
+        </section>
+
+        <details class="panel connection-panel">
+          <summary>Configuracao tecnica</summary>
+          <form id="connection-form">
+            <label>API base URL<input name="apiBaseUrl" value="http://127.0.0.1:8000" /></label>
+            <label>Supabase URL<input name="supabaseUrl" /></label>
+            <label>Supabase anon key<input name="supabaseAnonKey" type="password" /></label>
+            <button class="ghost-button" type="submit">Salvar conexao</button>
+          </form>
+        </details>
+      </aside>
+    </main>
+
+    <script src="../config.js?v=config-20260625-1"></script>
+    <script src="./app.js?v=auth-route-20260625-1"></script>
+  </body>
+</html>

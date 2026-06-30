@@ -1,0 +1,135 @@
+{
+  "loyalty_tiers": [
+    {
+      "name": "Bronze",
+      "min_points": 0,
+      "cashback_rate": 0.0,
+      "benefits": {
+        "description": "Entrada no programa Lugano Rewards",
+        "perks": ["Acumulo de pontos", "Campanhas abertas"]
+      }
+    },
+    {
+      "name": "Prata",
+      "min_points": 1000,
+      "cashback_rate": 2.0,
+      "benefits": {
+        "description": "Beneficios intermediarios e campanhas exclusivas",
+        "perks": ["Cashback de 2%", "Cupons sazonais"]
+      }
+    },
+    {
+      "name": "Ouro",
+      "min_points": 3000,
+      "cashback_rate": 5.0,
+      "benefits": {
+        "description": "Melhor cashback e prioridade em promocoes",
+        "perks": ["Cashback de 5%", "Campanhas premium", "Prioridade em novidades"]
+      }
+    }
+  ],
+  "products": [
+    {
+      "name": "Cappuccino Lugano",
+      "description": "Cappuccino cremoso da casa com espuma aveludada",
+      "category": "cafeteria",
+      "price": "16.90",
+      "available": true,
+      "image_url": "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      "name": "Chocolate Quente Lugano",
+      "description": "Chocolate quente especial, intenso e cremoso",
+      "category": "chocolateria",
+      "price": "19.90",
+      "available": true,
+      "image_url": "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      "name": "Brownie de Chocolate",
+      "description": "Brownie artesanal de chocolate com textura macia",
+      "category": "chocolateria",
+      "price": "14.90",
+      "available": true,
+      "image_url": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      "name": "Cafe Especial Lugano",
+      "description": "Cafe coado especial com notas de chocolate",
+      "category": "cafeteria",
+      "price": "11.90",
+      "available": true,
+      "image_url": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=80"
+    }
+  ],
+  "promotions": [
+    {
+      "code": "LUGANO10",
+      "description": "10% de desconto no pedido",
+      "type": "percentage",
+      "value": "10.00",
+      "min_order_cents": 3000,
+      "max_uses": 500,
+      "active": true
+    },
+    {
+      "code": "FRETEGRATIS",
+      "description": "Frete gratis em pedidos selecionados",
+      "type": "free_delivery",
+      "value": "0.00",
+      "min_order_cents": 4000,
+      "max_uses": 300,
+      "active": true
+    },
+    {
+      "code": "BOASVINDAS",
+      "description": "R$ 5,00 de desconto para novos clientes",
+      "type": "fixed",
+      "value": "5.00",
+      "min_order_cents": 2500,
+      "max_uses": 300,
+      "active": true
+    }
+  ],
+  "operational_settings": [
+    {
+      "key": "delivery_base_fee",
+      "value": 500,
+      "description": "Frete base em centavos"
+    },
+    {
+      "key": "delivery_free_threshold",
+      "value": 5000,
+      "description": "Pedido minimo em centavos para frete gratis"
+    },
+    {
+      "key": "points_per_real",
+      "value": 10,
+      "description": "Pontos concedidos por R$ 1,00 gasto"
+    },
+    {
+      "key": "business_hours",
+      "value": {
+        "timezone": "America/Fortaleza",
+        "weekly": {
+          "monday": ["09:00", "20:00"],
+          "tuesday": ["09:00", "20:00"],
+          "wednesday": ["09:00", "20:00"],
+          "thursday": ["09:00", "20:00"],
+          "friday": ["09:00", "21:00"],
+          "saturday": ["10:00", "21:00"],
+          "sunday": ["10:00", "18:00"]
+        }
+      },
+      "description": "Horario operacional padrao"
+    },
+    {
+      "key": "notifications",
+      "value": {
+        "email_enabled": true,
+        "whatsapp_enabled": true
+      },
+      "description": "Preferencia inicial de canais transacionais"
+    }
+  ]
+}

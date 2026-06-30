@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lugano | Admin</title>
+    <link rel="stylesheet" href="./styles.css?v=admin-20260625-2" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navegacao principal">
+        <div class="brand">
+          <div class="brand-mark">L</div>
+          <div>
+            <strong>Lugano</strong>
+            <span>Admin</span>
+          </div>
+        </div>
+
+        <nav class="nav-tabs" aria-label="Modulos">
+          <button class="nav-tab active" data-view="overview" type="button">Visao Geral</button>
+          <button class="nav-tab" data-view="orders" type="button">Pedidos</button>
+          <button class="nav-tab" data-view="products" type="button">Produtos</button>
+          <button class="nav-tab" data-view="customers" type="button">Clientes</button>
+          <button class="nav-tab" data-min-role="manager" data-view="promotions" type="button">Campanhas</button>
+          <button class="nav-tab" data-min-role="manager" data-view="reports" type="button">Relatorios</button>
+          <button class="nav-tab" data-min-role="owner" data-view="audit" type="button">Auditoria</button>
+          <button class="nav-tab" data-min-role="owner" data-view="team" type="button">Equipe</button>
+          <button class="nav-tab" data-view="settings" type="button">Acesso</button>
+        </nav>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <h1 id="view-title">Visao Geral</h1>
+            <p id="view-subtitle">Operacao comercial, pedidos e campanhas.</p>
+          </div>
+          <div class="connection-pill" id="connection-status">API nao testada</div>
+        </header>
+
+        <section class="notice hidden" id="notice" role="status"></section>
+
+        <section class="view active" id="view-overview">
+          <div class="metrics-grid">
+            <article class="metric">
+              <span>Pedidos</span>
+              <strong id="metric-orders">0</strong>
+            </article>
+            <article class="metric">
+              <span>Produtos ativos</span>
+              <strong id="metric-products">0</strong>
+            </article>
+            <article class="metric">
+              <span>Clientes</span>
+              <strong id="metric-customers">0</strong>
+            </article>
+            <article class="metric" data-min-role="manager">
+              <span>Campanhas ativas</span>
+              <strong id="metric-promotions">0</strong>
+            </article>
+          </div>
+
+          <div class="section-grid">
+            <section class="panel">
+              <div class="panel-heading">
+                <h2>Pedidos recentes</h2>
+                <button class="ghost-button" data-refresh="orders" type="button">Atualizar</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Pedido</th>
+                      <th>Status</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="overview-orders"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel" data-min-role="manager">
+              <div class="panel-heading">
+                <h2>Campanhas</h2>
+                <button class="ghost-button" data-refresh="promotions" type="button">Atualizar</button>
+              </div>
+              <div class="campaign-list" id="overview-promotions"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-orders">
+          <div class="toolbar">
+            <select id="order-status-filter" aria-label="Filtrar pedidos por status">
+              <option value="">Todos os status</option>
+              <option value="pending">Pendente</option>
+              <option value="confirmed">Confirmado</option>
+              <option value="preparing">Preparando</option>
+              <option value="out_for_delivery">Saiu para entrega</option>
+              <option value="delivered">Entregue</option>
+              <option value="cancelled">Cancelado</option>
+            </select>
+            <button class="primary-button" id="refresh-orders" type="button">Atualizar</button>
+          </div>
+
+          <div class="orders-workbench">
+            <section class="panel">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Pedido</th>
+                      <th>Cliente</th>
+                      <th>Status</th>
+                      <th>Pagamento</th>
+                      <th>Total</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="orders-table"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel order-detail-panel" id="order-detail">
+              <div class="empty-state">
+                <h2>Selecione um pedido</h2>
+                <p>Veja itens, cliente, entrega, observacoes e atualize o status.</p>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-products">
+          <div class="split-layout" id="products-layout">
+            <form class="panel form-panel" data-min-role="manager" id="product-form">
+              <h2>Novo produto</h2>
+              <label>Nome<input name="name" required /></label>
+              <label>Categoria<input name="category" value="cafeteria" required /></label>
+              <label>Preco<input name="price" type="number" step="0.01" min="0" required /></label>
+              <label>Descricao<textarea name="description" rows="3"></textarea></label>
+              <label>Imagem URL<input name="image_url" /></label>
+              <label class="check-row"><input name="available" type="checkbox" checked /> Disponivel</label>
+              <button class="primary-button" type="submit">Salvar produto</button>
+            </form>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <h2>Catalogo</h2>
+                <button class="ghost-button" data-refresh="products" type="button">Atualizar</button>
+              </div>
+              <div class="item-list" id="products-list"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-customers">
+          <section class="panel">
+            <div class="panel-heading">
+              <h2>Clientes</h2>
+              <button class="ghost-button" data-refresh="customers" type="button">Atualizar</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Telefone</th>
+                    <th>Cadastro</th>
+                  </tr>
+                </thead>
+                <tbody id="customers-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" data-min-role="manager" id="view-promotions">
+          <div class="split-layout">
+            <form class="panel form-panel" id="promotion-form">
+              <h2>Nova campanha</h2>
+              <label>Codigo<input name="code" required /></label>
+              <label>Tipo
+                <select name="type">
+                  <option value="percentage">Percentual</option>
+                  <option value="fixed">Valor fixo</option>
+                  <option value="free_delivery">Frete gratis</option>
+                </select>
+              </label>
+              <label>Valor<input name="value" type="number" step="0.01" min="0" value="0" /></label>
+              <label>Pedido minimo (centavos)<input name="min_order_cents" type="number" min="0" value="0" /></label>
+              <label>Limite de usos<input name="max_uses" type="number" min="1" /></label>
+              <label>Descricao<textarea name="description" rows="3"></textarea></label>
+              <label class="check-row"><input name="active" type="checkbox" checked /> Ativa</label>
+              <button class="primary-button" type="submit">Salvar campanha</button>
+            </form>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <h2>Campanhas</h2>
+                <button class="ghost-button" data-refresh="promotions" type="button">Atualizar</button>
+              </div>
+              <div class="item-list" id="promotions-list"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" data-min-role="manager" id="view-reports">
+          <form class="panel report-filters" id="reports-filter-form">
+            <div>
+              <h2>Periodo</h2>
+              <p class="muted">Filtre faturamento, tickets e rankings comerciais.</p>
+            </div>
+            <label>Inicio<input name="date_from" type="date" /></label>
+            <label>Fim<input name="date_to" type="date" /></label>
+            <button class="primary-button" type="submit">Atualizar relatorios</button>
+          </form>
+
+          <section class="metrics-grid reports-metrics">
+            <article class="metric">
+              <span>Faturamento liquido</span>
+              <strong id="report-net-revenue">R$ 0,00</strong>
+            </article>
+            <article class="metric">
+              <span>Ticket medio</span>
+              <strong id="report-average-ticket">R$ 0,00</strong>
+            </article>
+            <article class="metric">
+              <span>Pedidos validos</span>
+              <strong id="report-orders-count">0</strong>
+            </article>
+            <article class="metric">
+              <span>Cupons usados</span>
+              <strong id="report-coupon-uses">0</strong>
+            </article>
+          </section>
+
+          <div class="reports-grid">
+            <section class="panel">
+              <div class="panel-heading">
+                <h2>Resumo financeiro</h2>
+              </div>
+              <div class="report-kpi-list" id="report-summary-list"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <h2>Produtos mais vendidos</h2>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Produto</th>
+                      <th>Qtd.</th>
+                      <th>Pedidos</th>
+                      <th>Receita</th>
+                    </tr>
+                  </thead>
+                  <tbody id="report-products-table"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <h2>Clientes recorrentes</h2>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Cliente</th>
+                      <th>Pedidos</th>
+                      <th>Total</th>
+                      <th>Ultimo pedido</th>
+                    </tr>
+                  </thead>
+                  <tbody id="report-customers-table"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <h2>Uso de cupons</h2>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Cupom</th>
+                      <th>Usos</th>
+                      <th>Desconto</th>
+                    </tr>
+                  </thead>
+                  <tbody id="report-coupons-table"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" data-min-role="owner" id="view-audit">
+          <form class="panel audit-filters" id="audit-filter-form">
+            <div>
+              <h2>Trilha administrativa</h2>
+              <p class="muted">Acoes registradas no painel.</p>
+            </div>
+            <label>Entidade
+              <select name="entity_type">
+                <option value="">Todas</option>
+                <option value="order">Pedidos</option>
+                <option value="product">Produtos</option>
+                <option value="promotion">Campanhas</option>
+                <option value="customer">Clientes</option>
+                <option value="admin_user">Equipe</option>
+              </select>
+            </label>
+            <label>Usuario<input name="actor_profile_id" placeholder="UUID do admin" /></label>
+            <button class="primary-button" type="submit">Atualizar auditoria</button>
+          </form>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <h2>Eventos recentes</h2>
+              <button class="ghost-button" data-refresh="audit" type="button">Atualizar</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Acao</th>
+                    <th>Entidade</th>
+                    <th>Ator</th>
+                    <th>Detalhes</th>
+                  </tr>
+                </thead>
+                <tbody id="audit-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" data-min-role="owner" id="view-team">
+          <div class="split-layout">
+            <form class="panel form-panel" id="team-form">
+              <h2>Novo acesso</h2>
+              <label>ID do usuario<input name="profile_id" placeholder="UUID do Supabase Auth" required /></label>
+              <label>Papel
+                <select name="role">
+                  <option value="staff">Staff</option>
+                  <option value="manager">Manager</option>
+                  <option value="owner">Owner</option>
+                </select>
+              </label>
+              <label class="check-row"><input name="active" type="checkbox" checked /> Ativo</label>
+              <button class="primary-button" type="submit">Salvar acesso</button>
+            </form>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <h2>Equipe administrativa</h2>
+                <button class="ghost-button" data-refresh="team" type="button">Atualizar</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Usuario</th>
+                      <th>Email</th>
+                      <th>Papel</th>
+                      <th>Status</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="team-table"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-settings">
+          <div class="settings-grid">
+            <form class="panel settings-panel" id="settings-form">
+              <h2>Conexao</h2>
+              <label>API base URL<input name="apiBaseUrl" value="http://127.0.0.1:8000" /></label>
+              <details class="dev-access">
+                <summary>Chave tecnica</summary>
+                <label>Admin key<input name="adminKey" type="password" autocomplete="off" /></label>
+              </details>
+              <div class="button-row">
+                <button class="primary-button" type="submit">Salvar</button>
+                <button class="ghost-button" id="test-connection" type="button">Testar acesso</button>
+              </div>
+            </form>
+
+            <form class="panel settings-panel" id="admin-login-form">
+              <div class="panel-heading">
+                <h2>Login administrativo</h2>
+                <span class="status" id="admin-session-label">Desconectado</span>
+              </div>
+              <label>Email<input name="email" type="email" autocomplete="email" required /></label>
+              <label>Senha<input name="password" type="password" autocomplete="current-password" required /></label>
+              <div class="button-row">
+                <button class="primary-button" type="submit">Entrar</button>
+                <button class="ghost-button" id="admin-logout" type="button">Sair</button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="../config.js?v=config-20260625-1"></script>
+    <script src="./app.js?v=admin-20260625-3"></script>
+  </body>
+</html>

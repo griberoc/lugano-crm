@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lugano | Cliente</title>
+    <link rel="stylesheet" href="./styles.css?v=profile-20260621-1" />
+  </head>
+  <body>
+    <header class="customer-hero">
+      <nav class="topnav">
+        <a class="brand" href="../landing/index.html">
+          <span class="brand-mark">L</span>
+          <span>
+            <strong>Lugano</strong>
+            <small>Painel do Cliente</small>
+          </span>
+        </a>
+        <div class="session-actions">
+          <span id="session-label">Visitante</span>
+          <button class="ghost-button hidden" id="logout-button" type="button">Sair</button>
+        </div>
+      </nav>
+      <div class="hero-copy">
+        <span>Minha Lugano</span>
+        <h1>Acompanhe seus beneficios.</h1>
+        <p>Veja seus pontos, nivel de fidelidade, pedidos recentes e promocoes disponiveis.</p>
+      </div>
+    </header>
+
+    <main class="customer-layout">
+      <aside class="account-column">
+        <div class="notice hidden" id="notice"></div>
+
+        <section class="panel session-panel">
+          <div>
+            <h2>Acesso</h2>
+            <p id="auth-summary">Nenhuma conta conectada.</p>
+          </div>
+          <a class="primary-button" href="../client/#/acesso" target="_top">Ir para Acesso</a>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Minha conta</h2>
+              <p>Dados usados no relacionamento com a Lugano.</p>
+            </div>
+            <button class="ghost-button" id="refresh-dashboard" type="button">Atualizar</button>
+          </div>
+          <form id="profile-form">
+            <label>Nome<input name="full_name" /></label>
+            <label>Telefone<input name="phone" /></label>
+            <label>Nascimento<input name="birth_date" type="date" /></label>
+            <button class="primary-button" type="submit">Salvar dados</button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Enderecos salvos</h2>
+              <p>Locais usados para delivery e relacionamento.</p>
+            </div>
+          </div>
+          <div class="addresses-list" id="addresses-list"></div>
+          <form id="address-form">
+            <input name="address_id" type="hidden" />
+            <div class="form-grid two-columns">
+              <label>Apelido<input name="label" placeholder="Casa" required /></label>
+              <label>CEP<input name="zip_code" required /></label>
+            </div>
+            <label>Rua<input name="street" required /></label>
+            <div class="form-grid two-columns">
+              <label>Numero<input name="number" required /></label>
+              <label>Bairro<input name="neighborhood" required /></label>
+            </div>
+            <div class="form-grid two-columns">
+              <label>Cidade<input name="city" required /></label>
+              <label>Complemento<input name="complement" /></label>
+            </div>
+            <label class="checkbox-label">
+              <input name="is_default" type="checkbox" />
+              Usar como endereco principal
+            </label>
+            <div class="button-row">
+              <button class="primary-button" type="submit">Salvar endereco</button>
+              <button class="ghost-button hidden" id="cancel-address-edit" type="button">Cancelar edicao</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Preferencias</h2>
+              <p>Como a Lugano deve falar e vender melhor para voce.</p>
+            </div>
+          </div>
+          <form id="preferences-form">
+            <label>Contato preferido
+              <select name="preferred_contact">
+                <option value="">Sem preferencia</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="email">Email</option>
+                <option value="phone">Telefone</option>
+              </select>
+            </label>
+            <fieldset>
+              <legend>Categorias favoritas</legend>
+              <label class="checkbox-label"><input name="favorite_categories" value="cafeteria" type="checkbox" /> Cafeteria</label>
+              <label class="checkbox-label"><input name="favorite_categories" value="chocolateria" type="checkbox" /> Chocolateria</label>
+              <label class="checkbox-label"><input name="favorite_categories" value="sobremesas" type="checkbox" /> Sobremesas</label>
+              <label class="checkbox-label"><input name="favorite_categories" value="presentes" type="checkbox" /> Presentes</label>
+            </fieldset>
+            <label>Restricoes ou observacoes alimentares
+              <input name="dietary_restrictions" placeholder="sem lactose, sem acucar" />
+            </label>
+            <label class="checkbox-label">
+              <input name="accepts_promotions" type="checkbox" />
+              Quero receber promocoes
+            </label>
+            <label class="checkbox-label">
+              <input name="accepts_whatsapp" type="checkbox" />
+              Aceito atendimento por WhatsApp
+            </label>
+            <label>Notas de preferencia<textarea name="notes" rows="3"></textarea></label>
+            <button class="primary-button" type="submit">Salvar preferencias</button>
+          </form>
+        </section>
+
+        <details class="panel connection-panel">
+          <summary>Configuracao tecnica</summary>
+          <form id="connection-form">
+            <label>API base URL<input name="apiBaseUrl" value="http://127.0.0.1:8000" /></label>
+            <label>Supabase URL<input name="supabaseUrl" /></label>
+            <label>Supabase anon key<input name="supabaseAnonKey" type="password" /></label>
+            <button class="ghost-button" type="submit">Salvar conexao</button>
+          </form>
+        </details>
+
+        <a class="delivery-link" href="../client/#/delivery" target="_top">Fazer novo pedido</a>
+      </aside>
+
+      <section class="dashboard-column">
+        <section class="summary-grid" aria-label="Resumo de fidelidade">
+          <article>
+            <span>Pontos disponiveis</span>
+            <strong id="loyalty-available">0</strong>
+          </article>
+          <article>
+            <span>Pontos acumulados</span>
+            <strong id="loyalty-total">0</strong>
+          </article>
+          <article>
+            <span>Nivel atual</span>
+            <strong id="loyalty-tier">--</strong>
+          </article>
+          <article>
+            <span>Cashback</span>
+            <strong id="loyalty-cashback">0%</strong>
+          </article>
+        </section>
+
+        <section class="panel loyalty-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="section-kicker">Programa de fidelidade</span>
+              <h2>Status do nivel</h2>
+            </div>
+            <span class="tier-badge" id="tier-badge">Visitante</span>
+          </div>
+          <div class="progress-track">
+            <span id="loyalty-progress-bar"></span>
+          </div>
+          <p id="loyalty-progress-label">Entre para ver seu progresso.</p>
+          <div class="benefits-list" id="loyalty-benefits"></div>
+        </section>
+
+        <section class="dashboard-grid">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="section-kicker">Pedidos</span>
+                <h2>Ultimos pedidos</h2>
+              </div>
+            </div>
+            <div class="orders-list" id="orders-list"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="section-kicker">Campanhas</span>
+                <h2>Promocoes disponiveis</h2>
+              </div>
+            </div>
+            <div class="promotions-list" id="promotions-list"></div>
+          </section>
+
+          <section class="panel transactions-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="section-kicker">Extrato</span>
+                <h2>Movimento de pontos</h2>
+              </div>
+            </div>
+            <div class="transactions-list" id="transactions-list"></div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script src="../config.js?v=config-20260625-1"></script>
+    <script src="./app.js?v=profile-20260625-1"></script>
+  </body>
+</html>

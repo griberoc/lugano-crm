@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lugano | Cliente</title>
+    <link rel="stylesheet" href="./styles.css?v=client-20260621-1" />
+  </head>
+  <body>
+    <header class="portal-header">
+      <a class="brand" href="#/inicio">
+        <span class="brand-mark">L</span>
+        <span>
+          <strong>Lugano</strong>
+          <small>Cliente</small>
+        </span>
+      </a>
+
+      <nav class="route-nav" aria-label="Portal do cliente">
+        <a href="#/inicio" data-route-link="inicio">Inicio</a>
+        <a href="#/acesso" data-route-link="acesso">Acesso</a>
+        <a href="#/delivery" data-route-link="delivery">Delivery</a>
+        <a href="#/painel" data-route-link="painel">Painel</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="home-view" id="home-view">
+        <div class="home-hero">
+          <div class="home-copy">
+            <span>Chocolate, cafe e afeto em cada detalhe</span>
+            <h1>Lugano</h1>
+            <p>
+              Uma experiencia acolhedora de cafeteria e chocolateria, com delivery,
+              beneficios e promocoes para clientes recorrentes.
+            </p>
+            <div class="home-actions">
+              <a class="primary-button" href="#/delivery">Abrir delivery</a>
+              <a class="secondary-button" href="#/acesso">Entrar ou criar conta</a>
+            </div>
+          </div>
+        </div>
+
+        <section class="story-band">
+          <div class="story-copy">
+            <span class="section-kicker">Aconchego Lugano</span>
+            <h2>O aroma de cafeteria, a textura do chocolate e o cuidado de casa.</h2>
+            <p>
+              Do cappuccino cremoso ao chocolate quente especial, a Lugano conecta
+              pedido online, conta do cliente, pontos e campanhas em uma jornada so.
+            </p>
+          </div>
+          <div class="story-image" aria-label="Chocolate quente servido em mesa de cafeteria"></div>
+        </section>
+
+        <section class="flavors" id="sabores">
+          <div class="section-heading">
+            <span class="section-kicker">Favoritos</span>
+            <h2>Sabores que chegam quentinhos</h2>
+          </div>
+          <div class="flavor-grid">
+            <article class="flavor-card">
+              <img
+                src="https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=900&q=80"
+                alt="Cappuccino com espuma cremosa"
+              />
+              <div>
+                <h3>Cappuccino Lugano</h3>
+                <p>Espuma macia, cafe encorpado e final delicado.</p>
+              </div>
+            </article>
+            <article class="flavor-card">
+              <img
+                src="https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=900&q=80"
+                alt="Chocolate quente com chocolate derretido"
+              />
+              <div>
+                <h3>Chocolate Quente</h3>
+                <p>Intenso, aveludado e feito para aquecer a tarde.</p>
+              </div>
+            </article>
+            <article class="flavor-card">
+              <img
+                src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=900&q=80"
+                alt="Brownie de chocolate servido em prato"
+              />
+              <div>
+                <h3>Brownie de Chocolate</h3>
+                <p>Casquinha delicada, centro macio e sabor generoso.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+      </section>
+
+      <section class="module-view hidden" id="module-view">
+        <iframe id="module-frame" title="Portal Lugano"></iframe>
+      </section>
+    </main>
+
+    <script src="./app.js?v=client-20260621-1"></script>
+  </body>
+</html>

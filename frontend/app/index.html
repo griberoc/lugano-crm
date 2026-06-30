@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lugano CRM</title>
+    <link rel="stylesheet" href="./styles.css?v=app-20260621-1" />
+  </head>
+  <body>
+    <header class="app-header">
+      <a class="brand" href="#/inicio">
+        <span class="brand-mark">L</span>
+        <span>
+          <strong>Lugano</strong>
+          <small>CRM & Delivery</small>
+        </span>
+      </a>
+
+      <nav class="route-nav" aria-label="Rotas do sistema">
+        <a href="#/inicio" data-route-link="inicio">Início</a>
+        <a href="#/acesso" data-route-link="acesso">Acesso</a>
+        <a href="#/pedidos" data-route-link="pedidos">Delivery</a>
+        <a href="#/cliente" data-route-link="cliente">Cliente</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="home-view" id="home-view">
+        <div class="home-hero">
+          <div class="home-copy">
+            <span>Chocolate, café e afeto em cada detalhe</span>
+            <h1>Lugano</h1>
+            <p>
+              Uma experiência acolhedora de cafeteria e chocolateria, com
+              delivery para transformar qualquer pausa em um pequeno ritual.
+            </p>
+            <div class="home-actions">
+              <a class="primary-button" href="#/pedidos">Abrir delivery</a>
+              <a class="secondary-button" href="#sabores">Conhecer sabores</a>
+            </div>
+          </div>
+        </div>
+
+        <section class="story-band">
+          <div class="story-copy">
+            <span class="section-kicker">Aconchego Lugano</span>
+            <h2>O aroma de cafeteria, a textura do chocolate e o cuidado de casa.</h2>
+            <p>
+              Do cappuccino cremoso ao chocolate quente especial, a Lugano foi
+              pensada para quem gosta de saborear com calma, presentear com
+              gosto e receber bem.
+            </p>
+          </div>
+          <div
+            class="story-image"
+            aria-label="Chocolate quente servido em mesa de cafeteria"
+          ></div>
+        </section>
+
+        <section class="flavors" id="sabores">
+          <div class="section-heading">
+            <span class="section-kicker">Favoritos</span>
+            <h2>Sabores que chegam quentinhos</h2>
+          </div>
+          <div class="flavor-grid">
+            <article class="flavor-card">
+              <img
+                src="https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=900&q=80"
+                alt="Cappuccino com espuma cremosa"
+              />
+              <div>
+                <h3>Cappuccino Lugano</h3>
+                <p>Espuma macia, café encorpado e final delicado.</p>
+              </div>
+            </article>
+            <article class="flavor-card">
+              <img
+                src="https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=900&q=80"
+                alt="Chocolate quente com chocolate derretido"
+              />
+              <div>
+                <h3>Chocolate Quente</h3>
+                <p>Intenso, aveludado e feito para aquecer a tarde.</p>
+              </div>
+            </article>
+            <article class="flavor-card">
+              <img
+                src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=900&q=80"
+                alt="Brownie de chocolate servido em prato"
+              />
+              <div>
+                <h3>Brownie de Chocolate</h3>
+                <p>Casquinha delicada, centro macio e sabor generoso.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="ritual">
+          <div class="ritual-media"></div>
+          <div class="ritual-copy">
+            <span class="section-kicker">Delivery com cuidado</span>
+            <h2>Escolha, acompanhe e acumule pontos.</h2>
+            <p>
+              O sistema Lugano integra cardápio, pedidos, cupons e fidelidade em
+              uma jornada simples para o cliente e organizada para a operação.
+            </p>
+            <ul>
+              <li>Cardápio online sempre atualizado</li>
+              <li>Cupons e campanhas sazonais</li>
+              <li>Programa de pontos para clientes recorrentes</li>
+            </ul>
+            <a class="primary-button" href="#/pedidos">Entrar no delivery</a>
+          </div>
+        </section>
+      </section>
+
+      <section class="module-view hidden" id="module-view">
+        <iframe id="module-frame" title="Módulo Lugano"></iframe>
+      </section>
+    </main>
+
+    <script src="./app.js?v=app-20260621-1"></script>
+  </body>
+</html>

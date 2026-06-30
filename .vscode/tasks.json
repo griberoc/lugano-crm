@@ -1,0 +1,18 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run API",
+      "type": "shell",
+      "command": "poetry run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Tests",
+      "type": "shell",
+      "command": "poetry run pytest tests -v",
+      "problemMatcher": []
+    }
+  ]
+}
+
