@@ -91,35 +91,32 @@ http://127.0.0.1:8000/docs
 poetry run pytest tests -v
 ```
 
-## Smoke test com Supabase real
+## Roadmap, seguranca e deploy
 
-Com a API rodando localmente, use:
+Toda a documentacao operacional foi consolidada em:
+
+```text
+docs/roadmap-sistema-completo.md
+```
+
+Esse roadmap cobre:
+
+- estado atual do sistema;
+- rotas e endpoints principais;
+- papeis administrativos;
+- Supabase, RLS, migrations e seed;
+- variaveis de ambiente;
+- deploy backend/frontend;
+- seguranca, backups, monitoramento e handoff;
+- checklist final de aceite.
+
+Smoke test com Supabase real:
 
 ```powershell
 python scripts\smoke_test_api.py --token "ACCESS_TOKEN_DO_USUARIO"
 ```
 
-Veja o passo a passo em `docs/testing-real-endpoints.md`.
-
-## Notificacoes
-
-Email/WhatsApp transacional para pedidos fica documentado em
-`docs/notifications.md`.
-
-## Endpoints administrativos
-
-Os endpoints administrativos ficam em `/api/v1/admin/*` e exigem o header
-`Authorization: Bearer ...` de um usuario cadastrado em `public.admin_users`.
-O `X-Admin-Key` continua como fallback tecnico local.
-
-Veja o guia em `docs/admin-endpoints.md`.
-
-## Seguranca
-
-RLS, CORS, rate limit, admin roles e variaveis sensiveis estao documentados em
-`docs/security.md`.
-
-## Deploy
+## Artefatos de deploy
 
 O projeto inclui arquivos prontos para deploy:
 
@@ -129,18 +126,6 @@ O projeto inclui arquivos prontos para deploy:
 - `fly.toml` e `Dockerfile` para Fly.io;
 - `docker-compose.prod.yml` para VPS;
 - `frontend/vercel.json`, `frontend/_redirects` e `frontend/_headers` para site estatico.
-
-Veja o passo a passo em `docs/deploy.md`.
-Para a rota completa de entrega ao cliente em producao, use
-`docs/production-delivery-roadmap.md`.
-Para ensaiar o deploy sem tocar em dados reais, use `docs/staging.md`.
-Para validar a API publicada antes do release, use `docs/pre-deploy-checklist.md`.
-Para popular dados iniciais, use `docs/seed-initial-data.md`.
-Para backup, restore e retencao, use `docs/backup-retention.md`.
-Para monitoramento, healthcheck e alertas, use `docs/monitoring.md`.
-Para a revisao final de seguranca, use `docs/final-security-review.md`.
-Para fluxo de pagamento, use `docs/payments.md`.
-Para a reuniao de entrega assistida, use `docs/client-handoff.md`.
 
 ## Portais frontend
 
@@ -202,4 +187,4 @@ O antigo `frontend/app` fica apenas como entrada legada de desenvolvimento.
 - Publicar backend no Render com `render.yaml`.
 - Publicar frontend no Cloudflare Pages usando `frontend/config.production.example.js`.
 - Rodar `scripts/final_security_review.py` e `scripts/pre_deploy_check.py`.
-- Fazer entrega assistida usando `docs/client-handoff.md`.
+- Fazer entrega assistida seguindo `docs/roadmap-sistema-completo.md`.
