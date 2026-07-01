@@ -335,6 +335,15 @@ No Cloudflare Pages:
 3. Nao usar build command.
 4. Conectar dominio `app.seu-dominio.com`.
 
+Se usar Vercel em vez de Cloudflare Pages:
+
+- o `vercel.json` na raiz ja pula instalacao/build de Python;
+- o `outputDirectory` aponta para `frontend`;
+- se criar o projeto manualmente pelo dashboard, tambem pode definir Root
+  Directory como `frontend` para evitar autodetectar o backend;
+- se aparecer erro de `uv lock` ou `pyproject.toml`, o projeto esta tentando
+  buildar a API Python em vez do frontend estatico.
+
 Rotas esperadas:
 
 ```text
@@ -724,4 +733,3 @@ O sistema so deve ser considerado entregue quando:
 - auditoria registra acao administrativa;
 - cliente acompanha historico e fidelidade;
 - cliente final recebeu URLs e credenciais por canal seguro.
-

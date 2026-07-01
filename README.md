@@ -125,7 +125,7 @@ O projeto inclui arquivos prontos para deploy:
 - `railway.json` para Railway;
 - `fly.toml` e `Dockerfile` para Fly.io;
 - `docker-compose.prod.yml` para VPS;
-- `frontend/vercel.json`, `frontend/_redirects` e `frontend/_headers` para site estatico.
+- `vercel.json`, `frontend/vercel.json`, `frontend/_redirects` e `frontend/_headers` para site estatico.
 
 ## Portais frontend
 

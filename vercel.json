@@ -1,0 +1,26 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "echo \"Skipping install: static frontend only\"",
+  "buildCommand": "echo \"Skipping build: static frontend only\"",
+  "outputDirectory": "frontend",
+  "cleanUrls": true,
+  "trailingSlash": true,
+  "rewrites": [
+    { "source": "/", "destination": "/landing/index.html" },
+    { "source": "/client", "destination": "/client/index.html" },
+    { "source": "/admin", "destination": "/admin/index.html" },
+    { "source": "/auth", "destination": "/auth/index.html" },
+    { "source": "/orders", "destination": "/orders/index.html" },
+    { "source": "/customer", "destination": "/customer/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    }
+  ]
+}
+
