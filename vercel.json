@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
   "installCommand": "echo \"Skipping install: static frontend only\"",
   "buildCommand": "echo \"Skipping build: static frontend only\"",
   "outputDirectory": "frontend",
@@ -23,4 +24,3 @@
     }
   ]
 }
-
