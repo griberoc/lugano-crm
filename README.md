@@ -131,6 +131,8 @@ O projeto inclui arquivos prontos para deploy:
 - `frontend/vercel.json`, `frontend/_redirects` e `frontend/_headers` para site estatico.
 
 Veja o passo a passo em `docs/deploy.md`.
+Para a rota completa de entrega ao cliente em producao, use
+`docs/production-delivery-roadmap.md`.
 Para ensaiar o deploy sem tocar em dados reais, use `docs/staging.md`.
 Para validar a API publicada antes do release, use `docs/pre-deploy-checklist.md`.
 Para popular dados iniciais, use `docs/seed-initial-data.md`.
@@ -138,6 +140,7 @@ Para backup, restore e retencao, use `docs/backup-retention.md`.
 Para monitoramento, healthcheck e alertas, use `docs/monitoring.md`.
 Para a revisao final de seguranca, use `docs/final-security-review.md`.
 Para fluxo de pagamento, use `docs/payments.md`.
+Para a reuniao de entrega assistida, use `docs/client-handoff.md`.
 
 ## Portais frontend
 
@@ -195,8 +198,8 @@ O antigo `frontend/app` fica apenas como entrada legada de desenvolvimento.
 
 ## Próximos passos sugeridos
 
-- Aplicar o schema inicial em `supabase/migrations/001_initial_schema.sql`.
-- Criar políticas RLS no Supabase.
-- Adicionar endpoints administrativos para produtos, clientes e campanhas.
-- Criar frontend ou painel interno para atendimento.
-- Adicionar testes de pedidos e fidelidade.
+- Aplicar migrations `001` ate `011` no Supabase de producao.
+- Publicar backend no Render com `render.yaml`.
+- Publicar frontend no Cloudflare Pages usando `frontend/config.production.example.js`.
+- Rodar `scripts/final_security_review.py` e `scripts/pre_deploy_check.py`.
+- Fazer entrega assistida usando `docs/client-handoff.md`.

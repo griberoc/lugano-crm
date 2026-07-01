@@ -39,3 +39,47 @@ services:
         value: "5000"
       - key: POINTS_PER_REAL
         value: "10"
+      - key: PAYMENT_PROVIDER
+        value: pix_static
+      - key: PIX_KEY
+        sync: false
+      - key: PIX_MERCHANT_NAME
+        sync: false
+      - key: PIX_MERCHANT_CITY
+        sync: false
+      - key: PIX_TXID_PREFIX
+        value: LUG
+      - key: PIX_EXPIRES_MINUTES
+        value: "30"
+      - key: NOTIFICATIONS_ENABLED
+        value: "false"
+      - key: NOTIFICATION_EMAIL_ENABLED
+        value: "false"
+      - key: NOTIFICATION_WHATSAPP_ENABLED
+        value: "false"
+      - key: NOTIFICATION_EMAIL_WEBHOOK_URL
+        sync: false
+      - key: NOTIFICATION_EMAIL_WEBHOOK_TOKEN
+        sync: false
+      - key: NOTIFICATION_WHATSAPP_WEBHOOK_URL
+        sync: false
+      - key: NOTIFICATION_WHATSAPP_WEBHOOK_TOKEN
+        sync: false
+      - key: NOTIFICATION_WEBHOOK_TIMEOUT_SECONDS
+        value: "5"
+      - key: HEALTHCHECK_SUPABASE_ENABLED
+        value: "true"
+      - key: MONITORING_ALERTS_ENABLED
+        value: "false"
+      - key: MONITORING_WEBHOOK_URL
+        sync: false
+      - key: MONITORING_WEBHOOK_TOKEN
+        sync: false
+      - key: MONITORING_WEBHOOK_TIMEOUT_SECONDS
+        value: "5"
+      - key: MONITORING_SERVICE_NAME
+        value: lugano-crm
+      - key: MONITORING_HEALTH_PATH
+        value: /health/ready
+      - key: MONITORING_ENVIRONMENT
+        value: production

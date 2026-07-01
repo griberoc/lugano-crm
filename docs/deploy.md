@@ -3,6 +3,9 @@
 Este guia cobre Supabase em producao, backend em Render/Fly/Railway/VPS e
 frontend estatico em Vercel/Netlify/Supabase Storage.
 
+Para a rota completa de entrega ao cliente, incluindo ferramentas, criterios de
+aceite e handoff, use `docs/production-delivery-roadmap.md`.
+
 ## 1. Staging antes de producao
 
 Antes do deploy final, suba um ambiente separado de staging:
@@ -152,6 +155,8 @@ window.LUGANO_CONFIG = {
   supabaseAnonKey: "sua-chave-anon-publica",
 };
 ```
+
+Use `frontend/config.production.example.js` como modelo para producao.
 
 Nao coloque `SUPABASE_SERVICE_ROLE_KEY` no frontend.
 
