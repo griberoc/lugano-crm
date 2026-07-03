@@ -172,6 +172,23 @@ function orderItems(order) {
   return order?.order_items || order?.items || [];
 }
 
+function orderNextStatus(order) {
+  if (!order || ["delivered", "cancelled"].includes(order.status)) return null;
+  const currentIndex = orderFlow.indexOf(order.status);
+  if (currentIndex === -1 || currentIndex >= orderFlow.length - 1) return null;
+  return orderFlow[currentIndex + 1];
+}
+
+function orderItemCount(order) {
+  return orderItems(order).reduce((total, item) => total + Number(item.quantity || 0), 0);
+}
+
+function addressSummary(order) {
+  const address = order?.address;
+  if (!address) return "Endereco pendente";
+  return [address.neighborhood, address.city].filter(Boolean).join(" - ") || formatAddress(address);
+}
+
 function showNotice(message, type = "info") {
   const notice = $("#notice");
   notice.textContent = message;
@@ -339,28 +356,62 @@ function renderOverview() {
 }
 
 function renderOrders() {
-  $("#orders-table").innerHTML = state.orders
+  const counts = Object.keys(orderStatusLabels).reduce((accumulator, status) => {
+    accumulator[status] = state.orders.filter((order) => order.status === status).length;
+    return accumulator;
+  }, {});
+
+  $("#orders-status-board").innerHTML = Object.entries(orderStatusLabels)
     .map(
-      (order) => `
-        <tr class="${order.id === state.selectedOrderId ? "selected-row" : ""}">
-          <td>#${shortId(order.id)}</td>
-          <td>
-            <strong>${customerName(order)}</strong>
-            <span class="table-subtitle">${formatDateTime(order.placed_at)}</span>
-          </td>
-          <td><span class="status ${order.status}">${orderStatusLabels[order.status] || order.status}</span></td>
-          <td><span class="status ${order.payment_status}">${paymentStatusLabels[order.payment_status] || order.payment_status}</span></td>
-          <td>${money(order.total)}</td>
-          <td>
-            <div class="table-actions">
-              <button class="small-button" data-order-select="${order.id}" type="button">Ver</button>
-              <button class="small-button" data-order-next="${order.id}" type="button" ${["delivered", "cancelled"].includes(order.status) ? "disabled" : ""}>Avancar</button>
-            </div>
-          </td>
-        </tr>
+      ([status, label]) => `
+        <article class="status-tile">
+          <span>${label}</span>
+          <strong>${counts[status] || 0}</strong>
+        </article>
       `,
     )
     .join("");
+
+  $("#orders-queue-count").textContent = `${state.orders.length} ${state.orders.length === 1 ? "pedido" : "pedidos"}`;
+
+  $("#orders-queue").innerHTML = state.orders.length
+    ? state.orders
+        .map((order) => {
+          const next = orderNextStatus(order);
+          return `
+            <article class="order-queue-card ${order.id === state.selectedOrderId ? "active" : ""}">
+              <div class="queue-card-main">
+                <div>
+                  <span class="queue-id">#${shortId(order.id)}</span>
+                  <strong>${customerName(order)}</strong>
+                  <p>${formatDateTime(order.placed_at)}</p>
+                </div>
+                <span class="status ${order.status}">${orderStatusLabels[order.status] || order.status}</span>
+              </div>
+              <div class="queue-meta">
+                <span>${orderItemCount(order)} ${orderItemCount(order) === 1 ? "item" : "itens"}</span>
+                <span>${addressSummary(order)}</span>
+                <span>${money(order.total)}</span>
+              </div>
+              <div class="queue-card-footer">
+                <span class="status ${order.payment_status}">${paymentStatusLabels[order.payment_status] || order.payment_status}</span>
+                <div class="table-actions">
+                  <button class="small-button" data-order-select="${order.id}" type="button">Abrir</button>
+                  <button class="small-button primary-action" data-order-next="${order.id}" type="button" ${!next ? "disabled" : ""}>
+                    ${next ? orderStatusLabels[next] : "Concluido"}
+                  </button>
+                </div>
+              </div>
+            </article>
+          `;
+        })
+        .join("")
+    : `
+      <div class="empty-queue">
+        <strong>Nenhum pedido nesta fila</strong>
+        <span>Use outro filtro ou atualize a lista.</span>
+      </div>
+    `;
 
   renderOrderDetail();
 }
@@ -379,13 +430,25 @@ function renderOrderDetail() {
   }
 
   const items = orderItems(order);
+  const nextStatus = orderNextStatus(order);
   panel.innerHTML = `
-    <div class="order-detail-heading">
+    <div class="order-detail-heading detail-hero">
       <div>
         <span class="muted">Pedido #${shortId(order.id)}</span>
         <h2>${customerName(order)}</h2>
+        <p>${formatDateTime(order.placed_at)}</p>
       </div>
-      <span class="status ${order.status}">${orderStatusLabels[order.status] || order.status}</span>
+      <div class="detail-hero-actions">
+        <span class="status ${order.status}">${orderStatusLabels[order.status] || order.status}</span>
+        <strong>${money(order.total)}</strong>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <button class="primary-button" data-order-next="${order.id}" type="button" ${!nextStatus ? "disabled" : ""}>
+        ${nextStatus ? `Mover para ${orderStatusLabels[nextStatus]}` : "Sem proximo status"}
+      </button>
+      <span>${paymentStatusLabels[order.payment_status] || order.payment_status}</span>
     </div>
 
     <div class="detail-grid">
@@ -397,6 +460,7 @@ function renderOrderDetail() {
       <article>
         <span>Entrega</span>
         <strong>${formatAddress(order.address)}</strong>
+        <p>${order.delivery_instructions || order.notes || "Sem observacoes de entrega"}</p>
       </article>
       <article>
         <span>Pagamento</span>
@@ -411,14 +475,17 @@ function renderOrderDetail() {
     </div>
 
     <section class="detail-section">
-      <h3>Itens</h3>
+      <div class="detail-section-heading">
+        <h3>Itens do pedido</h3>
+        <span>${orderItemCount(order)} ${orderItemCount(order) === 1 ? "item" : "itens"}</span>
+      </div>
       <div class="item-list compact-list">
         ${
           items.length
             ? items
                 .map(
                   (item) => `
-                    <article class="list-item">
+                    <article class="detail-item-row">
                       <div class="list-item-header">
                         <strong>${item.product?.name || shortId(item.product_id)}</strong>
                         <span>${item.quantity} x ${money(item.unit_price)}</span>
@@ -434,7 +501,10 @@ function renderOrderDetail() {
     </section>
 
     <form class="detail-section order-update-form" id="order-update-form">
-      <h3>Atualizar pedido</h3>
+      <div class="detail-section-heading">
+        <h3>Atualizar operacao</h3>
+        <span>Registro auditado</span>
+      </div>
       <label>Status
         <select name="status">
           ${Object.entries(orderStatusLabels)
