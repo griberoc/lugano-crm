@@ -282,6 +282,14 @@ main {
   color: #d8c8b5;
 }
 
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-weight: 700;
+}
+
 @media (max-width: 900px) {
   .nav {
     align-items: flex-start;
@@ -319,5 +327,9 @@ main {
   .footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .footer-links {
+    gap: 12px;
   }
 }

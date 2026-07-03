@@ -5,15 +5,15 @@ const routes = {
   },
   acesso: {
     title: "Acesso",
-    frame: "../auth/index.html?v=auth-route-20260625-1",
+    frame: "../auth/index.html?v=auth-route-20260703-1",
   },
   delivery: {
     title: "Delivery",
-    frame: "../orders/index.html?v=checkout-20260625-1",
+    frame: "../orders/index.html?v=checkout-20260703-1",
   },
   painel: {
     title: "Painel",
-    frame: "../customer/index.html?v=profile-20260625-1",
+    frame: "../customer/index.html?v=profile-20260703-1",
   },
 };
 
