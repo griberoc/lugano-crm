@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Lugano | Pedidos</title>
-    <link rel="stylesheet" href="./styles.css?v=checkout-20260703-1" />
+    <title>Lugano | Delivery</title>
+    <link rel="stylesheet" href="./styles.css?v=checkout-20260703-2" />
   </head>
   <body>
-    <header class="page-hero">
+    <header class="page-hero compact-hero">
       <nav class="nav">
         <a class="brand" href="../landing/index.html">
           <span class="brand-mark">L</span>
@@ -21,13 +21,14 @@
           <button class="ghost-button hidden" id="logout-button" type="button">Sair</button>
         </div>
       </nav>
+
       <div class="hero-copy">
         <span>Delivery Lugano</span>
-        <h1>Seu café, chocolate e sobremesa a caminho.</h1>
-        <p>Escolha os favoritos da Lugano, confirme a entrega e acompanhe seu pedido.</p>
+        <h1>Cafe, chocolate e sobremesa a caminho.</h1>
+        <p>Escolha seus favoritos e finalize em uma trilha simples.</p>
         <div class="delivery-hero-actions">
-          <a href="#product-grid">Ver cardápio</a>
-          <a href="#checkout-button">Finalizar pedido</a>
+          <a href="#product-grid">Ver cardapio</a>
+          <a href="#step-cart">Meu pedido</a>
         </div>
       </div>
     </header>
@@ -36,32 +37,11 @@
       <section class="menu-column">
         <div class="notice hidden" id="notice"></div>
 
-        <section class="delivery-status" aria-label="Resumo do delivery">
+        <section class="menu-heading menu-stage">
           <div>
-            <span>Modo de compra</span>
-            <strong>Delivery</strong>
-          </div>
-          <div>
-            <span>Preparo estimado</span>
-            <strong>25-40 min</strong>
-          </div>
-          <div>
-            <span>Atendimento</span>
-            <strong>Cafeteria e chocolateria</strong>
-          </div>
-        </section>
-
-        <section class="delivery-strip">
-          <div><strong>1. Escolha</strong><span>Selecione produtos do cardapio</span></div>
-          <div><strong>2. Revise</strong><span>Confira carrinho, cupom e entrega</span></div>
-          <div><strong>3. Envie</strong><span>O pedido segue para preparo</span></div>
-        </section>
-
-        <section class="menu-heading">
-          <div>
-            <span class="section-kicker">Cardápio delivery</span>
+            <span class="section-kicker">Cardapio delivery</span>
             <h2>Monte seu pedido</h2>
-            <p>Escolha os produtos e envie para preparo.</p>
+            <p>Cafes, chocolates e sobremesas preparados para entrega.</p>
           </div>
           <div class="toolbar">
             <select id="category-filter" aria-label="Filtrar categoria">
@@ -75,10 +55,32 @@
       </section>
 
       <aside class="checkout-column" aria-label="Checkout do delivery">
-        <section class="checkout-panel checkout-main">
-          <div class="checkout-title">
-            <h2>Pedido</h2>
-            <span id="cart-count">0 itens</span>
+        <section class="checkout-progress" aria-label="Etapas do pedido">
+          <div class="flow-step active" id="flow-cart">
+            <span>1</span>
+            <strong>Carrinho</strong>
+          </div>
+          <div class="flow-step" id="flow-account">
+            <span>2</span>
+            <strong>Acesso</strong>
+          </div>
+          <div class="flow-step" id="flow-delivery">
+            <span>3</span>
+            <strong>Entrega</strong>
+          </div>
+          <div class="flow-step" id="flow-payment">
+            <span>4</span>
+            <strong>Pagamento</strong>
+          </div>
+        </section>
+
+        <section class="checkout-panel checkout-main step-panel" id="step-cart">
+          <div class="step-heading">
+            <span class="step-index">1</span>
+            <div>
+              <h2>Carrinho</h2>
+              <p id="cart-count">0 itens</p>
+            </div>
           </div>
           <div class="cart-list" id="cart-list"></div>
           <div class="totals">
@@ -88,37 +90,61 @@
             <div class="grand-total"><span>Total estimado</span><strong id="cart-total">R$ 0,00</strong></div>
           </div>
           <p class="checkout-note" id="free-delivery-hint"></p>
+          <div class="step-actions">
+            <button class="ghost-button" data-go-step="step-account" type="button">Continuar</button>
+          </div>
         </section>
 
-        <section class="checkout-panel session-panel">
-          <h2>Identificação</h2>
+        <section class="checkout-panel session-panel step-panel" id="step-account">
+          <div class="step-heading">
+            <span class="step-index">2</span>
+            <div>
+              <h2>Acesso</h2>
+              <p>Conta do cliente</p>
+            </div>
+          </div>
           <p class="muted" id="auth-summary">Nenhuma conta conectada.</p>
           <a class="primary-button" href="../client/#/acesso" target="_top">Ir para Acesso</a>
         </section>
 
-        <section class="checkout-panel">
-          <h2>Entrega</h2>
-          <label>Endereço salvo
-            <select id="address-select" aria-label="Endereço de entrega"></select>
+        <section class="checkout-panel step-panel" id="step-delivery">
+          <div class="step-heading">
+            <span class="step-index">3</span>
+            <div>
+              <h2>Entrega</h2>
+              <p>Endereco e observacoes</p>
+            </div>
+          </div>
+          <label>Endereco salvo
+            <select id="address-select" aria-label="Endereco de entrega"></select>
           </label>
-          <p class="selection-summary" id="address-summary">Selecione ou cadastre um endereÃ§o.</p>
+          <p class="selection-summary" id="address-summary">Selecione ou cadastre um endereco.</p>
           <details>
-            <summary>Novo endereço</summary>
+            <summary>Novo endereco</summary>
             <form id="address-form">
               <label>Apelido<input name="label" value="Casa" required /></label>
               <label>Rua<input name="street" required /></label>
-              <label>Número<input name="number" required /></label>
+              <label>Numero<input name="number" required /></label>
               <label>Bairro<input name="neighborhood" required /></label>
               <label>Cidade<input name="city" required /></label>
               <label>CEP<input name="zip_code" required /></label>
               <label>Complemento<input name="complement" /></label>
-              <button class="ghost-button" type="submit">Salvar endereço</button>
+              <button class="ghost-button" type="submit">Salvar endereco</button>
             </form>
           </details>
+          <div class="step-actions">
+            <button class="ghost-button" data-go-step="step-payment" type="button">Continuar</button>
+          </div>
         </section>
 
-        <section class="checkout-panel">
-          <h2>Pagamento</h2>
+        <section class="checkout-panel step-panel" id="step-payment">
+          <div class="step-heading">
+            <span class="step-index">4</span>
+            <div>
+              <h2>Pagamento</h2>
+              <p>Cupom e forma de pagamento</p>
+            </div>
+          </div>
           <label>Cupom<input id="promotion-code" placeholder="LUGANO10" /></label>
           <div class="button-row">
             <button class="ghost-button" id="validate-promotion" type="button">Aplicar cupom</button>
@@ -128,13 +154,13 @@
           <label>Forma de pagamento
             <select id="payment-method">
               <option value="pix">Pix</option>
-              <option value="credit_card">Cartão de crédito</option>
-              <option value="debit_card">Cartão de débito</option>
+              <option value="credit_card">Cartao de credito</option>
+              <option value="debit_card">Cartao de debito</option>
               <option value="cash">Dinheiro</option>
             </select>
           </label>
           <p class="selection-summary" id="payment-summary">Pagamento via Pix.</p>
-          <label>Observações<textarea id="order-notes" rows="3"></textarea></label>
+          <label>Observacoes<textarea id="order-notes" rows="3"></textarea></label>
           <button class="primary-button checkout-button" id="checkout-button" type="button">
             Revisar pedido
           </button>
@@ -173,6 +199,6 @@
     </div>
 
     <script src="../config.js?v=config-20260703-1"></script>
-    <script src="./app.js?v=checkout-20260703-1"></script>
+    <script src="./app.js?v=checkout-20260703-2"></script>
   </body>
 </html>

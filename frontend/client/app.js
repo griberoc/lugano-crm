@@ -9,7 +9,7 @@ const routes = {
   },
   delivery: {
     title: "Delivery",
-    frame: "../orders/index.html?v=checkout-20260703-1",
+    frame: "../orders/index.html?v=checkout-20260703-2",
   },
   painel: {
     title: "Painel",

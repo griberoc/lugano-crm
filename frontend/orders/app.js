@@ -156,6 +156,59 @@ function selectedPaymentLabel() {
   return paymentLabels[$("#payment-method")?.value] || "Pix";
 }
 
+function checkoutStepStatus() {
+  const hasCart = cartQuantity() > 0;
+  const hasAccount = Boolean(state.session);
+  const hasDelivery = Boolean(selectedAddress());
+  let active = "cart";
+
+  if (hasCart && !hasAccount) active = "account";
+  if (hasCart && hasAccount && !hasDelivery) active = "delivery";
+  if (hasCart && hasAccount && hasDelivery) active = "payment";
+
+  return {
+    active,
+    complete: {
+      cart: hasCart,
+      account: hasAccount,
+      delivery: hasDelivery,
+      payment: false,
+    },
+  };
+}
+
+function setStepClasses(baseId, step, status) {
+  const element = $(`#${baseId}-${step}`);
+  if (!element) return;
+  element.classList.toggle("active", status.active === step);
+  element.classList.toggle("complete", Boolean(status.complete[step]));
+  element.classList.toggle("locked", !status.complete[step] && status.active !== step);
+}
+
+function renderCheckoutProgress() {
+  const status = checkoutStepStatus();
+  ["cart", "account", "delivery", "payment"].forEach((step) => {
+    setStepClasses("flow", step, status);
+    setStepClasses("step", step, status);
+  });
+}
+
+function goToStep(stepId) {
+  const status = checkoutStepStatus();
+
+  if (stepId === "step-account" && !status.complete.cart) {
+    showNotice("Adicione produtos ao pedido.", "error");
+    return;
+  }
+
+  if (stepId === "step-payment" && !status.complete.delivery) {
+    showNotice("Selecione ou cadastre um endereco.", "error");
+    return;
+  }
+
+  document.getElementById(stepId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function shortId(id) {
   return id ? String(id).slice(0, 8) : "-";
 }
@@ -240,6 +293,8 @@ function renderCart() {
   } else {
     $("#free-delivery-hint").textContent = `Faltam ${moneyCents(amountToFreeDelivery)} para entrega gratis.`;
   }
+
+  renderCheckoutProgress();
 }
 
 function renderAddresses() {
@@ -259,6 +314,7 @@ function renderAddresses() {
     $("#address-select").value = selectedId;
   }
   $("#address-summary").textContent = formatAddress(selectedAddress());
+  renderCheckoutProgress();
 }
 
 function renderCheckoutDetails() {
@@ -339,6 +395,7 @@ function renderAll() {
   renderAddresses();
   renderCheckoutDetails();
   renderLastOrder();
+  renderCheckoutProgress();
 }
 
 async function loadProducts() {
@@ -583,9 +640,11 @@ function bindEvents() {
   $("#copy-pix").addEventListener("click", copyPixCode);
 
   document.addEventListener("click", (event) => {
+    const stepButton = event.target.closest("[data-go-step]");
     const addButton = event.target.closest("[data-add-product]");
     const decreaseButton = event.target.closest("[data-decrease-product]");
     const removeButton = event.target.closest("[data-remove-product]");
+    if (stepButton) goToStep(stepButton.dataset.goStep);
     if (addButton) addToCart(addButton.dataset.addProduct);
     if (decreaseButton) decreaseCartItem(decreaseButton.dataset.decreaseProduct);
     if (removeButton) removeFromCart(removeButton.dataset.removeProduct);
