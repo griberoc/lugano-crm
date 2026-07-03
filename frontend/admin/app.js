@@ -45,7 +45,7 @@ const titles = {
   reports: ["Relatorios", "Faturamento, rankings, recorrencia e cupons."],
   audit: ["Auditoria", "Registro de acoes administrativas."],
   team: ["Equipe", "Acessos administrativos e papeis do time."],
-  settings: ["Acesso", "Login administrativo do portal."],
+  settings: ["Acesso", "Sessao administrativa."],
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -189,27 +189,56 @@ function addressSummary(order) {
   return [address.neighborhood, address.city].filter(Boolean).join(" - ") || formatAddress(address);
 }
 
-function showNotice(message, type = "info") {
-  const notice = $("#notice");
+function paintNotice(notice, message, type = "info") {
+  if (!notice) return;
   notice.textContent = message;
   notice.classList.remove("hidden");
   notice.style.borderLeftColor = type === "error" ? "var(--danger)" : "var(--brand-2)";
 }
 
-function renderAuthStatus() {
-  const label = $("#admin-session-label");
-  if (!label) return;
+function hideNotice(selector) {
+  const notice = $(selector);
+  if (notice) notice.classList.add("hidden");
+}
 
+function showNotice(message, type = "info") {
+  paintNotice($("#notice"), message, type);
+  if (!hasAdminCredential()) paintNotice($("#login-notice"), message, type);
+}
+
+function renderAdminGate() {
+  const loggedIn = hasAdminCredential();
+  $("#admin-login-gate")?.classList.toggle("hidden", loggedIn);
+  $("#admin-app")?.classList.toggle("hidden", !loggedIn);
+  document.body.classList.toggle("admin-locked", !loggedIn);
+  if (loggedIn) hideNotice("#login-notice");
+}
+
+function renderAuthStatus() {
   if (state.adminProfile?.auth_method === "supabase") {
-    label.textContent = state.adminProfile.role;
-    label.classList.add("active");
+    $$("#admin-session-label").forEach((label) => {
+      label.textContent = state.adminProfile.role;
+      label.classList.add("active");
+    });
+    if ($("#admin-session-email")) {
+      $("#admin-session-email").textContent = state.adminUser?.email || "-";
+    }
+    if ($("#admin-session-role")) {
+      $("#admin-session-role").textContent = state.adminProfile.role || "-";
+    }
     applyRoleAccess();
+    renderAdminGate();
     return;
   }
 
-  label.textContent = "Desconectado";
-  label.classList.remove("active");
+  $$("#admin-session-label").forEach((label) => {
+    label.textContent = "Desconectado";
+    label.classList.remove("active");
+  });
+  if ($("#admin-session-email")) $("#admin-session-email").textContent = "-";
+  if ($("#admin-session-role")) $("#admin-session-role").textContent = "-";
   applyRoleAccess();
+  renderAdminGate();
 }
 
 function setConnectionStatus(message, ok = false) {
@@ -246,7 +275,7 @@ function headers() {
 }
 
 function hasAdminCredential() {
-  return Boolean(state.adminSession?.access_token);
+  return Boolean(state.adminSession?.access_token && state.adminProfile?.auth_method === "supabase");
 }
 
 function persistAdminSession() {
@@ -293,7 +322,9 @@ async function api(path, options = {}) {
     } catch {
       detail = await response.text();
     }
-    throw new Error(detail);
+    const error = new Error(detail);
+    error.status = response.status;
+    throw error;
   }
 
   if (response.status === 204) return null;
@@ -822,6 +853,8 @@ async function loadDashboard() {
     return;
   }
 
+  renderAuthStatus();
+
   try {
     const loaders = [loadOrders(), loadProducts(), loadCustomers()];
     if (canManageBusiness()) {
@@ -843,6 +876,14 @@ async function loadDashboard() {
     renderAll();
     setConnectionStatus("Conectado", true);
   } catch (error) {
+    if ([401, 403].includes(error.status)) {
+      clearAdminSession();
+      setConnectionStatus("Aguardando login", false);
+      renderAuthStatus();
+      showNotice("Sessao administrativa expirada. Entre novamente.", "error");
+      return;
+    }
+
     setConnectionStatus("Falha ao carregar", false);
     showNotice(`Falha ao carregar dados administrativos: ${error.message}`, "error");
   }
@@ -1041,6 +1082,9 @@ async function loginAdmin(event) {
         password: data.password,
       }),
     });
+    if (!auth.access_token || auth.admin?.auth_method !== "supabase") {
+      throw new Error("Usuario sem acesso administrativo ativo.");
+    }
 
     state.adminSession = {
       access_token: auth.access_token,
@@ -1052,7 +1096,8 @@ async function loginAdmin(event) {
     persistAdminSession();
     renderAuthStatus();
     form.reset();
-    setConnectionStatus(`Admin ${state.adminProfile.role}`, true);
+    setConnectionStatus(`Admin ${state.adminProfile?.role || "validado"}`, true);
+    hideNotice("#login-notice");
     showNotice("Login administrativo validado.");
     await loadDashboard();
   } catch (error) {

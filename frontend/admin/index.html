@@ -4,10 +4,35 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Lugano | Admin</title>
-    <link rel="stylesheet" href="./styles.css?v=admin-20260703-2" />
+    <link rel="stylesheet" href="./styles.css?v=admin-20260703-3" />
   </head>
   <body>
-    <div class="app-shell">
+    <section class="admin-login-gate" id="admin-login-gate">
+      <div class="login-intro">
+        <div class="login-brand">
+          <div class="brand-mark">L</div>
+          <div>
+            <strong>Lugano</strong>
+            <span>Admin</span>
+          </div>
+        </div>
+        <h1>Portal administrativo</h1>
+        <p>Acesso restrito da equipe.</p>
+      </div>
+
+      <form class="panel login-card" id="admin-login-form">
+        <div class="panel-heading">
+          <h2>Entrar</h2>
+          <span class="status">Equipe</span>
+        </div>
+        <section class="notice hidden" id="login-notice" role="status"></section>
+        <label>Email<input name="email" type="email" autocomplete="email" required /></label>
+        <label>Senha<input name="password" type="password" autocomplete="current-password" required /></label>
+        <button class="primary-button" type="submit">Entrar no painel</button>
+      </form>
+    </section>
+
+    <div class="app-shell hidden" id="admin-app">
       <aside class="sidebar" aria-label="Navegacao principal">
         <div class="brand">
           <div class="brand-mark">L</div>
@@ -385,24 +410,29 @@
 
         <section class="view" id="view-settings">
           <div class="settings-grid">
-            <form class="panel settings-panel" id="admin-login-form">
+            <section class="panel settings-panel">
               <div class="panel-heading">
-                <h2>Login administrativo</h2>
+                <h2>Sessao administrativa</h2>
                 <span class="status" id="admin-session-label">Desconectado</span>
               </div>
-              <label>Email<input name="email" type="email" autocomplete="email" required /></label>
-              <label>Senha<input name="password" type="password" autocomplete="current-password" required /></label>
-              <div class="button-row">
-                <button class="primary-button" type="submit">Entrar</button>
-                <button class="ghost-button" id="admin-logout" type="button">Sair</button>
+              <div class="session-summary">
+                <div>
+                  <span>Email</span>
+                  <strong id="admin-session-email">-</strong>
+                </div>
+                <div>
+                  <span>Papel</span>
+                  <strong id="admin-session-role">-</strong>
+                </div>
               </div>
-            </form>
+              <button class="ghost-button" id="admin-logout" type="button">Sair do painel</button>
+            </section>
           </div>
         </section>
       </main>
     </div>
 
     <script src="../config.js?v=config-20260703-1"></script>
-    <script src="./app.js?v=admin-20260703-2"></script>
+    <script src="./app.js?v=admin-20260703-3"></script>
   </body>
 </html>
