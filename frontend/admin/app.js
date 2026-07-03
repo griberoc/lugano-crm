@@ -10,9 +10,15 @@ function loadStoredJson(key) {
   }
 }
 
+function clearLegacyTechnicalConfig() {
+  localStorage.removeItem("lugano.apiBaseUrl");
+  localStorage.removeItem("lugano.adminKey");
+}
+
+clearLegacyTechnicalConfig();
+
 const state = {
-  apiBaseUrl: localStorage.getItem("lugano.apiBaseUrl") || DEFAULT_API_URL,
-  adminKey: localStorage.getItem("lugano.adminKey") || "",
+  apiBaseUrl: DEFAULT_API_URL,
   adminSession: loadStoredJson("lugano.admin.session"),
   adminUser: loadStoredJson("lugano.admin.user"),
   adminProfile: loadStoredJson("lugano.admin.profile"),
@@ -39,7 +45,7 @@ const titles = {
   reports: ["Relatorios", "Faturamento, rankings, recorrencia e cupons."],
   audit: ["Auditoria", "Registro de acoes administrativas."],
   team: ["Equipe", "Acessos administrativos e papeis do time."],
-  settings: ["Acesso", "Login administrativo e conexao com a API."],
+  settings: ["Acesso", "Login administrativo do portal."],
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -94,7 +100,6 @@ const orderFlow = [
 
 function currentRole() {
   if (state.adminProfile?.role) return state.adminProfile.role;
-  if (state.adminKey) return "owner";
   return null;
 }
 
@@ -185,13 +190,6 @@ function renderAuthStatus() {
     return;
   }
 
-  if (state.adminKey) {
-    label.textContent = "Chave tecnica";
-    label.classList.add("active");
-    applyRoleAccess();
-    return;
-  }
-
   label.textContent = "Desconectado";
   label.classList.remove("active");
   applyRoleAccess();
@@ -203,7 +201,7 @@ function setConnectionStatus(message, ok = false) {
   element.classList.toggle("ok", ok);
   element.classList.toggle(
     "error",
-    !ok && !["API nao testada", "Aguardando login"].includes(message),
+    !ok && !["Aguardando acesso", "Aguardando login"].includes(message),
   );
 }
 
@@ -226,14 +224,12 @@ function headers() {
   };
   if (state.adminSession?.access_token) {
     authHeaders.Authorization = `Bearer ${state.adminSession.access_token}`;
-  } else if (state.adminKey) {
-    authHeaders["X-Admin-Key"] = state.adminKey;
   }
   return authHeaders;
 }
 
 function hasAdminCredential() {
-  return Boolean(state.adminSession?.access_token || state.adminKey);
+  return Boolean(state.adminSession?.access_token);
 }
 
 function persistAdminSession() {
@@ -751,7 +747,7 @@ async function loadAuditLogsIfAllowed() {
 
 async function loadDashboard() {
   if (!hasAdminCredential()) {
-    setConnectionStatus("Aguardando login", false);
+    setConnectionStatus("Aguardando acesso", false);
     renderAuthStatus();
     return;
   }
@@ -777,7 +773,7 @@ async function loadDashboard() {
     renderAll();
     setConnectionStatus("Conectado", true);
   } catch (error) {
-    setConnectionStatus("Falha na API", false);
+    setConnectionStatus("Falha ao carregar", false);
     showNotice(`Falha ao carregar dados administrativos: ${error.message}`, "error");
   }
 }
@@ -1009,37 +1005,8 @@ function logoutAdmin() {
   localStorage.removeItem("lugano.admin.selectedOrderId");
   renderAll();
   renderAuthStatus();
-  setConnectionStatus("Aguardando login", false);
+  setConnectionStatus("Aguardando acesso", false);
   showNotice("Sessao administrativa encerrada.");
-}
-
-function saveSettings(event) {
-  event.preventDefault();
-  const data = formData(event.currentTarget);
-  state.apiBaseUrl = data.apiBaseUrl || DEFAULT_API_URL;
-  state.adminKey = data.adminKey || "";
-  localStorage.setItem("lugano.apiBaseUrl", state.apiBaseUrl);
-  localStorage.setItem("lugano.adminKey", state.adminKey);
-  renderAuthStatus();
-  showNotice("Conexao salva.");
-}
-
-async function testConnection() {
-  try {
-    await api("/health");
-    const profile = await api("/api/v1/admin/me");
-    state.adminProfile = profile;
-    persistAdminSession();
-    renderAuthStatus();
-    setConnectionStatus("Conectado", true);
-    showNotice("API e acesso administrativo responderam corretamente.");
-  } catch (error) {
-    setConnectionStatus("Falha na API", false);
-    showNotice(
-      `Falha na conexao administrativa: ${error.message}. Confira API base URL, login admin, Supabase ou chave tecnica.`,
-      "error",
-    );
-  }
 }
 
 function bindEvents() {
@@ -1064,10 +1031,8 @@ function bindEvents() {
   $("#reports-filter-form").addEventListener("submit", refreshReports);
   $("#audit-filter-form").addEventListener("submit", refreshAuditLogs);
   $("#team-form").addEventListener("submit", createAdminUser);
-  $("#settings-form").addEventListener("submit", saveSettings);
   $("#admin-login-form").addEventListener("submit", loginAdmin);
   $("#admin-logout").addEventListener("click", logoutAdmin);
-  $("#test-connection").addEventListener("click", testConnection);
 
   document.addEventListener("submit", async (event) => {
     if (event.target.matches("#order-update-form")) {
@@ -1102,8 +1067,6 @@ function bindEvents() {
 }
 
 function hydrateSettings() {
-  $("#settings-form").elements.apiBaseUrl.value = state.apiBaseUrl;
-  $("#settings-form").elements.adminKey.value = state.adminKey;
   if (!state.reportDateFrom) state.reportDateFrom = defaultReportStart();
   if (!state.reportDateTo) state.reportDateTo = dateInputValue(new Date());
   $("#reports-filter-form").elements.date_from.value = state.reportDateFrom;

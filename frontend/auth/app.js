@@ -3,11 +3,18 @@ const DEFAULT_API_URL = runtimeConfig.apiBaseUrl || "http://127.0.0.1:8000";
 const DEFAULT_SUPABASE_URL = runtimeConfig.supabaseUrl || "";
 const DEFAULT_SUPABASE_ANON_KEY = runtimeConfig.supabaseAnonKey || "";
 
+function clearLegacyTechnicalConfig() {
+  localStorage.removeItem("lugano.customer.apiBaseUrl");
+  localStorage.removeItem("lugano.customer.supabaseUrl");
+  localStorage.removeItem("lugano.customer.supabaseAnonKey");
+}
+
+clearLegacyTechnicalConfig();
+
 const state = {
-  apiBaseUrl: localStorage.getItem("lugano.customer.apiBaseUrl") || DEFAULT_API_URL,
-  supabaseUrl: localStorage.getItem("lugano.customer.supabaseUrl") || DEFAULT_SUPABASE_URL,
-  supabaseAnonKey:
-    localStorage.getItem("lugano.customer.supabaseAnonKey") || DEFAULT_SUPABASE_ANON_KEY,
+  apiBaseUrl: DEFAULT_API_URL,
+  supabaseUrl: DEFAULT_SUPABASE_URL,
+  supabaseAnonKey: DEFAULT_SUPABASE_ANON_KEY,
   session: JSON.parse(localStorage.getItem("lugano.customer.session") || "null"),
 };
 
@@ -73,7 +80,7 @@ function setAuthMode(mode) {
 
 function requireSupabaseConfig() {
   if (!state.supabaseUrl || !state.supabaseAnonKey) {
-    showNotice("Preencha Supabase URL e anon key na configuracao tecnica.", "error");
+    showNotice("Nao foi possivel iniciar o acesso. Configuracao publica ausente.", "error");
     return false;
   }
   return true;
@@ -193,33 +200,13 @@ function logout() {
   showNotice("Sessao encerrada.");
 }
 
-function saveConnection(event) {
-  event.preventDefault();
-  const data = formData(event.currentTarget);
-  state.apiBaseUrl = data.apiBaseUrl || DEFAULT_API_URL;
-  state.supabaseUrl = data.supabaseUrl || "";
-  state.supabaseAnonKey = data.supabaseAnonKey || "";
-  localStorage.setItem("lugano.customer.apiBaseUrl", state.apiBaseUrl);
-  localStorage.setItem("lugano.customer.supabaseUrl", state.supabaseUrl);
-  localStorage.setItem("lugano.customer.supabaseAnonKey", state.supabaseAnonKey);
-  showNotice("Conexao salva.");
-}
-
-function hydrateForms() {
-  $("#connection-form").elements.apiBaseUrl.value = state.apiBaseUrl;
-  $("#connection-form").elements.supabaseUrl.value = state.supabaseUrl;
-  $("#connection-form").elements.supabaseAnonKey.value = state.supabaseAnonKey;
-}
-
 function bindEvents() {
   $("#login-form").addEventListener("submit", login);
   $("#signup-form").addEventListener("submit", signup);
   $("#show-login").addEventListener("click", () => setAuthMode("login"));
   $("#show-signup").addEventListener("click", () => setAuthMode("signup"));
   $("#logout-button").addEventListener("click", logout);
-  $("#connection-form").addEventListener("submit", saveConnection);
 }
 
-hydrateForms();
 bindEvents();
 renderSession();

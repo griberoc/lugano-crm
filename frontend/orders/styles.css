@@ -238,10 +238,6 @@ form {
   color: var(--ink);
 }
 
-.connection-panel form {
-  margin-top: 12px;
-}
-
 .compact-heading {
   display: flex;
   align-items: center;

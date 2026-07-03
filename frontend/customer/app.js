@@ -3,11 +3,18 @@ const DEFAULT_API_URL = runtimeConfig.apiBaseUrl || "http://127.0.0.1:8000";
 const DEFAULT_SUPABASE_URL = runtimeConfig.supabaseUrl || "";
 const DEFAULT_SUPABASE_ANON_KEY = runtimeConfig.supabaseAnonKey || "";
 
+function clearLegacyTechnicalConfig() {
+  localStorage.removeItem("lugano.customer.apiBaseUrl");
+  localStorage.removeItem("lugano.customer.supabaseUrl");
+  localStorage.removeItem("lugano.customer.supabaseAnonKey");
+}
+
+clearLegacyTechnicalConfig();
+
 const state = {
-  apiBaseUrl: localStorage.getItem("lugano.customer.apiBaseUrl") || DEFAULT_API_URL,
-  supabaseUrl: localStorage.getItem("lugano.customer.supabaseUrl") || DEFAULT_SUPABASE_URL,
-  supabaseAnonKey:
-    localStorage.getItem("lugano.customer.supabaseAnonKey") || DEFAULT_SUPABASE_ANON_KEY,
+  apiBaseUrl: DEFAULT_API_URL,
+  supabaseUrl: DEFAULT_SUPABASE_URL,
+  supabaseAnonKey: DEFAULT_SUPABASE_ANON_KEY,
   session: JSON.parse(localStorage.getItem("lugano.customer.session") || "null"),
   profile: null,
   loyalty: null,
@@ -364,18 +371,6 @@ function logout() {
   renderAll();
 }
 
-function saveConnection(event) {
-  event.preventDefault();
-  const data = formData(event.currentTarget);
-  state.apiBaseUrl = data.apiBaseUrl || DEFAULT_API_URL;
-  state.supabaseUrl = data.supabaseUrl || "";
-  state.supabaseAnonKey = data.supabaseAnonKey || "";
-  localStorage.setItem("lugano.customer.apiBaseUrl", state.apiBaseUrl);
-  localStorage.setItem("lugano.customer.supabaseUrl", state.supabaseUrl);
-  localStorage.setItem("lugano.customer.supabaseAnonKey", state.supabaseAnonKey);
-  showNotice("Conexao salva.");
-}
-
 async function saveProfile(event) {
   event.preventDefault();
   if (!state.session) {
@@ -491,18 +486,11 @@ async function deleteAddress(addressId) {
   showNotice("Endereco removido.", "success");
 }
 
-function hydrateForms() {
-  $("#connection-form").elements.apiBaseUrl.value = state.apiBaseUrl;
-  $("#connection-form").elements.supabaseUrl.value = state.supabaseUrl;
-  $("#connection-form").elements.supabaseAnonKey.value = state.supabaseAnonKey;
-}
-
 function bindEvents() {
   $("#profile-form").addEventListener("submit", saveProfile);
   $("#preferences-form").addEventListener("submit", savePreferences);
   $("#address-form").addEventListener("submit", saveAddress);
   $("#cancel-address-edit").addEventListener("click", clearAddressForm);
-  $("#connection-form").addEventListener("submit", saveConnection);
   $("#logout-button").addEventListener("click", logout);
   $("#refresh-dashboard").addEventListener("click", () => {
     loadDashboard().catch((error) => showNotice(error.message, "error"));
@@ -527,7 +515,6 @@ function bindEvents() {
   });
 }
 
-hydrateForms();
 bindEvents();
 renderAll();
 loadDashboard().catch((error) => showNotice(error.message, "error"));
