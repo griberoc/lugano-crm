@@ -579,3 +579,231 @@ details form {
     justify-content: flex-start;
   }
 }
+
+/* Personal account dashboard */
+.account-hero {
+  min-height: 300px;
+  background:
+    linear-gradient(90deg, rgba(31, 14, 9, 0.94), rgba(31, 14, 9, 0.42)),
+    url("https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=1800&q=85");
+  background-position: center;
+  background-size: cover;
+}
+
+.account-copy {
+  margin-top: 52px;
+}
+
+.account-copy h1 {
+  max-width: 840px;
+  font-size: clamp(40px, 6vw, 74px);
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 26px;
+}
+
+.hero-refresh {
+  border-color: rgba(255, 248, 237, 0.42);
+  background: rgba(255, 248, 237, 0.12);
+  color: #fff8ed;
+}
+
+.account-layout {
+  grid-template-columns: minmax(0, 1fr) 390px;
+}
+
+.account-main {
+  gap: 18px;
+}
+
+.account-settings {
+  position: sticky;
+  top: 16px;
+}
+
+.account-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: 16px;
+}
+
+.loyalty-spotlight {
+  min-height: 250px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  align-items: stretch;
+  gap: 16px;
+  border: 1px solid rgba(139, 48, 41, 0.24);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(197, 150, 79, 0.22), rgba(255, 250, 242, 0)),
+    var(--paper);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.spotlight-copy {
+  display: grid;
+  align-content: center;
+  gap: 12px;
+}
+
+.spotlight-copy h2 {
+  max-width: 620px;
+  font-size: clamp(32px, 4.2vw, 58px);
+  line-height: 0.98;
+}
+
+.spotlight-score {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  border: 1px solid rgba(139, 48, 41, 0.2);
+  border-radius: 8px;
+  background: #fffdf8;
+  text-align: center;
+  padding: 18px;
+}
+
+.spotlight-score span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.spotlight-score strong {
+  color: var(--wine);
+  font-size: clamp(52px, 7vw, 84px);
+  line-height: 0.9;
+}
+
+.spotlight-score small {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  border-radius: 999px;
+  background: rgba(197, 150, 79, 0.18);
+  color: var(--wine);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 0 12px;
+}
+
+.account-overview .summary-grid {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.account-overview .summary-grid article {
+  min-height: 74px;
+  padding: 15px;
+}
+
+.account-overview .summary-grid strong {
+  font-size: 26px;
+}
+
+.priority-grid {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+}
+
+.compact-action {
+  min-height: 36px;
+  white-space: nowrap;
+}
+
+.compact-panel {
+  gap: 14px;
+}
+
+.compact-panel h2 {
+  font-size: 20px;
+}
+
+.account-details {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffdf8;
+  padding: 12px;
+}
+
+.account-details[open] {
+  background: var(--paper);
+}
+
+.account-details form {
+  margin-top: 12px;
+}
+
+.account-settings .panel {
+  box-shadow: 0 12px 32px rgba(41, 25, 16, 0.08);
+}
+
+.session-panel .primary-button {
+  width: 100%;
+}
+
+.loyalty-panel {
+  background:
+    linear-gradient(180deg, rgba(197, 150, 79, 0.12), rgba(255, 250, 242, 0)),
+    var(--paper);
+}
+
+.priority-grid .panel {
+  min-height: 360px;
+}
+
+@media (max-width: 1180px) {
+  .account-layout,
+  .account-overview,
+  .priority-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .account-settings {
+    position: static;
+  }
+
+  .account-overview .summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .account-copy {
+    margin-top: 42px;
+  }
+
+  .loyalty-spotlight {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+
+  .spotlight-score {
+    min-height: 190px;
+  }
+
+  .account-overview .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .hero-actions .primary-button,
+  .hero-actions .ghost-button {
+    width: 100%;
+  }
+}

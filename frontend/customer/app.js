@@ -121,11 +121,18 @@ function splitList(value) {
 
 function renderSession() {
   const email = state.session?.user?.email || state.profile?.email;
+  const firstName = state.profile?.full_name?.split(" ")[0];
   $("#session-label").textContent = email || "Visitante";
   $("#logout-button").classList.toggle("hidden", !state.session);
   $("#auth-summary").textContent = email
     ? `Conta conectada: ${email}`
     : "Entre pela rota Acesso para carregar seu painel.";
+  $("#customer-greeting").textContent = firstName
+    ? `Ola, ${firstName}.`
+    : "Seu clube de beneficios.";
+  $("#customer-summary").textContent = email
+    ? "Acompanhe seus pontos, pedidos recentes e promocoes."
+    : "Entre para ver seus pontos, nivel, pedidos e promocoes.";
 }
 
 function renderProfile() {
@@ -200,12 +207,15 @@ function renderLoyalty() {
   $("#loyalty-cashback").textContent = tier ? `${Number(tier.cashback_rate)}%` : "0%";
 
   if (!loyalty || !tier) {
+    $("#loyalty-headline").textContent = "Entre para ativar sua conta Lugano.";
     $("#loyalty-progress-bar").style.width = "0%";
     $("#loyalty-progress-label").textContent = "Entre para ver seu progresso.";
     $("#loyalty-benefits").innerHTML = '<p class="muted">Os beneficios aparecem apos o login.</p>';
     return;
   }
 
+  $("#loyalty-headline").textContent =
+    `${loyalty.available_points} pontos disponiveis no nivel ${tier.name}.`;
   $("#loyalty-progress-bar").style.width = "100%";
   $("#loyalty-progress-label").textContent =
     `${loyalty.total_points} pontos acumulados. Nivel ${tier.name} conquistado a partir de ${tier.min_points} pontos.`;
@@ -445,6 +455,7 @@ function editAddress(addressId) {
   form.elements.city.value = address.city || "";
   form.elements.zip_code.value = address.zip_code || "";
   form.elements.is_default.checked = Boolean(address.is_default);
+  $("#address-details").open = true;
   $("#cancel-address-edit").classList.remove("hidden");
   form.scrollIntoView({ behavior: "smooth", block: "center" });
 }

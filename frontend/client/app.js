@@ -13,7 +13,7 @@ const routes = {
   },
   painel: {
     title: "Painel",
-    frame: "../customer/index.html?v=profile-20260703-1",
+    frame: "../customer/index.html?v=profile-20260703-2",
   },
 };
 
