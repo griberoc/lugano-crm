@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Lugano | Admin</title>
-    <link rel="stylesheet" href="./styles.css?v=admin-20260703-3" />
+    <link rel="stylesheet" href="./styles.css?v=admin-20260703-4" />
   </head>
   <body>
     <section class="admin-login-gate" id="admin-login-gate">
@@ -16,20 +16,32 @@
             <span>Admin</span>
           </div>
         </div>
-        <h1>Portal administrativo</h1>
-        <p>Acesso restrito da equipe.</p>
+        <div class="login-copy">
+          <span>Operacao Lugano</span>
+          <h1>Portal administrativo</h1>
+          <p>Acesso restrito da equipe.</p>
+        </div>
+        <div class="login-signature">
+          <span>Chocolateria e cafeteria</span>
+          <strong>Sao Luis</strong>
+        </div>
       </div>
 
-      <form class="panel login-card" id="admin-login-form">
-        <div class="panel-heading">
-          <h2>Entrar</h2>
-          <span class="status">Equipe</span>
-        </div>
-        <section class="notice hidden" id="login-notice" role="status"></section>
-        <label>Email<input name="email" type="email" autocomplete="email" required /></label>
-        <label>Senha<input name="password" type="password" autocomplete="current-password" required /></label>
-        <button class="primary-button" type="submit">Entrar no painel</button>
-      </form>
+      <div class="login-card-area">
+        <form class="panel login-card" id="admin-login-form">
+          <div class="login-card-header">
+            <span>Acesso interno</span>
+            <h2>Entrar no admin</h2>
+          </div>
+          <section class="notice hidden" id="login-notice" role="status"></section>
+          <label>Email<input name="email" type="email" autocomplete="email" required /></label>
+          <label>Senha<input name="password" type="password" autocomplete="current-password" required /></label>
+          <button class="primary-button" type="submit">Entrar no painel</button>
+          <div class="login-card-footer">
+            <span>Ambiente protegido</span>
+          </div>
+        </form>
+      </div>
     </section>
 
     <div class="app-shell hidden" id="admin-app">
@@ -433,6 +445,6 @@
     </div>
 
     <script src="../config.js?v=config-20260703-1"></script>
-    <script src="./app.js?v=admin-20260703-3"></script>
+    <script src="./app.js?v=admin-20260703-4"></script>
   </body>
 </html>
