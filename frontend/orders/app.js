@@ -193,6 +193,26 @@ function renderCheckoutProgress() {
   });
 }
 
+function updateFloatingAccessButton() {
+  const button = $("#floating-access-button");
+  const menu = $(".menu-column");
+  const accessStep = $("#step-account");
+  if (!button || !menu || !accessStep) return;
+
+  if (state.session) {
+    button.classList.add("hidden");
+    return;
+  }
+
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+  const menuRect = menu.getBoundingClientRect();
+  const accessRect = accessStep.getBoundingClientRect();
+  const menuVisible = menuRect.bottom > 120 && menuRect.top < viewportHeight - 120;
+  const accessVisible = accessRect.top < viewportHeight - 72 && accessRect.bottom > 72;
+
+  button.classList.toggle("hidden", !menuVisible || accessVisible);
+}
+
 function goToStep(stepId) {
   const status = checkoutStepStatus();
 
@@ -396,6 +416,7 @@ function renderAll() {
   renderCheckoutDetails();
   renderLastOrder();
   renderCheckoutProgress();
+  updateFloatingAccessButton();
 }
 
 async function loadProducts() {
@@ -638,6 +659,8 @@ function bindEvents() {
   $("#cancel-confirmation").addEventListener("click", closeOrderConfirmation);
   $("#confirm-order").addEventListener("click", submitOrder);
   $("#copy-pix").addEventListener("click", copyPixCode);
+  window.addEventListener("scroll", updateFloatingAccessButton, { passive: true });
+  window.addEventListener("resize", updateFloatingAccessButton);
 
   document.addEventListener("click", (event) => {
     const stepButton = event.target.closest("[data-go-step]");

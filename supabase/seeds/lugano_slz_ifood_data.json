@@ -1,0 +1,725 @@
+{
+  "source": {
+    "name": "Lugano SLZ - Chocolataria e Cafeteria",
+    "url": "https://www.ifood.com.br/delivery/sao-luis-ma/lugano-slz---chocolataria-e-cafeteria-jardim-renascenca/9800bb4a-696d-447e-be36-449be1c63138",
+    "captured_at": "2026-07-03",
+    "notes": "Cardapio extraido da pagina publica do iFood com autorizacao informada pelo cliente. Imagens placeholder do iFood foram mantidas como null."
+  },
+  "loyalty_tiers": [
+    {
+      "name": "Bronze",
+      "min_points": 0,
+      "cashback_rate": 0.0,
+      "benefits": {
+        "description": "Entrada no programa Lugano Rewards",
+        "perks": ["Acumulo de pontos", "Campanhas abertas"]
+      }
+    },
+    {
+      "name": "Prata",
+      "min_points": 1000,
+      "cashback_rate": 2.0,
+      "benefits": {
+        "description": "Beneficios intermediarios e campanhas exclusivas",
+        "perks": ["Cashback de 2%", "Cupons sazonais"]
+      }
+    },
+    {
+      "name": "Ouro",
+      "min_points": 3000,
+      "cashback_rate": 5.0,
+      "benefits": {
+        "description": "Melhor cashback e prioridade em promocoes",
+        "perks": ["Cashback de 5%", "Campanhas premium", "Prioridade em novidades"]
+      }
+    }
+  ],
+  "products": [
+    {
+      "name": "Bolo de Vó com Cobertura de Chocolate",
+      "description": null,
+      "category": "Cafeteria",
+      "price": "26.90",
+      "available": true,
+      "image_url": "https://static.ifood-static.com.br/image/upload/t_low/pratos/9800bb4a-696d-447e-be36-449be1c63138/202105061600_2IWQ_.jpeg"
+    },
+    {
+      "name": "Omelete Clássico",
+      "description": "Três ovos com um toque de tempero verde: clássico e saboroso. Opção para adicionar recheios de sua preferência",
+      "category": "Cafeteria",
+      "price": "23.90",
+      "available": true,
+      "image_url": "https://static.ifood-static.com.br/image/upload/t_low/pratos/9800bb4a-696d-447e-be36-449be1c63138/202409151234_0G87_i.jpg"
+    },
+    {
+      "name": "Brownie",
+      "description": "Brownie com o verdadeiro chocolate de Gramado. Não acompanha calda!",
+      "category": "Cafeteria",
+      "price": "23.90",
+      "available": true,
+      "image_url": "https://static.ifood-static.com.br/image/upload/t_low/pratos/9800bb4a-696d-447e-be36-449be1c63138/202509021905_4J3X_i.jpg"
+    },
+    {
+      "name": "Cappuccino Tradicional Lugano",
+      "description": "Deliciosa receita de cappuccino lugano e leite vaporizado",
+      "category": "Cafeteria",
+      "price": "28.90",
+      "available": true,
+      "image_url": "https://static.ifood-static.com.br/image/upload/t_low/pratos/9800bb4a-696d-447e-be36-449be1c63138/202409181619_T2CE_i.jpg"
+    },
+    {
+      "name": "Chocolate Gelado Lugano",
+      "description": "Delicioso chocolate cremoso gelado!!",
+      "category": "Cafeteria",
+      "price": "27.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Chocolate Quente com Creme de Avelã",
+      "description": "Delicioso chocolate quente cremoso com creme de avelã!!",
+      "category": "Cafeteria",
+      "price": "32.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Chocolate Quente Lugano",
+      "description": "Delicioso chocolate quente cremoso!!",
+      "category": "Cafeteria",
+      "price": "27.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Chocolate Quente Lugano com Licor",
+      "description": "Chocolate quente cremoso com delicada dose de licor de chocolate!! >> Produto Para Maiores De 18 Anos<<",
+      "category": "Cafeteria",
+      "price": "33.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Ciabatta de Filé Mignon",
+      "description": "Saboroso sanduiche de pão ciabata com filé mignon, queijo mussarela e cebola caramelizada. Acompanha geleia de pimenta.",
+      "category": "Cafeteria",
+      "price": "55.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Coxinha de Frango",
+      "description": "Unidade",
+      "category": "Cafeteria",
+      "price": "21.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Crepioca Simples",
+      "description": "Crepioca simples sem recheio. Opção de adicionar recheios",
+      "category": "Cafeteria",
+      "price": "19.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Croissant Amanteigado Simples",
+      "description": "Delicioso croissant crocante e sabor amantegado",
+      "category": "Cafeteria",
+      "price": "23.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Croque Monsieur",
+      "description": "Sanduiche francês com mussarela, presunto, molho bechamel, toque de mostarda com mel.",
+      "category": "Cafeteria",
+      "price": "41.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Cuscuz de Carne de Sol e Queijo Coalho",
+      "description": "Recheado com queijo coalho e carne de sol.",
+      "category": "Cafeteria",
+      "price": "28.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Cuscuz na Manteiga",
+      "description": "Delicioso cuscuz na manteiga.",
+      "category": "Cafeteria",
+      "price": "11.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Empada de Carne de Sol",
+      "description": "Nossa famosa Empada de Carne de Sol cremosa. Und.",
+      "category": "Cafeteria",
+      "price": "26.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Empada de Frango",
+      "description": "Unidade",
+      "category": "Cafeteria",
+      "price": "23.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Empadão de Frango com Catupiry",
+      "description": "Nossa famosa fatia de Empadão de Frango com Catupiry.",
+      "category": "Cafeteria",
+      "price": "31.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Mini Pães de Queijo",
+      "description": "Porção com 05 unidades",
+      "category": "Cafeteria",
+      "price": "21.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Palha Italiana",
+      "description": null,
+      "category": "Cafeteria",
+      "price": "23.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Pizza Dobrada",
+      "description": null,
+      "category": "Cafeteria",
+      "price": "26.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Pão de Queijo Big",
+      "description": "Unitário",
+      "category": "Cafeteria",
+      "price": "11.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Quiche de Alho Poro",
+      "description": "Fatia de Quiche Saborosa",
+      "category": "Cafeteria",
+      "price": "28.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Sanduiche de Waffle Maçaricado",
+      "description": "Com Presunto e Queijo Maçaricado",
+      "category": "Cafeteria",
+      "price": "38.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Tapioca",
+      "description": "Deliciosa tapioca na manteiga",
+      "category": "Cafeteria",
+      "price": "15.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Torta Lugano",
+      "description": "Receita secreta de família, com a perfeita combinação de chocolate Lugano.",
+      "category": "Cafeteria",
+      "price": "35.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Tostex Marguerita",
+      "description": "Pão de forma com manteiga, queijo mussarela, tomate, manjericão",
+      "category": "Cafeteria",
+      "price": "34.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Tostex Presunto e Queijo",
+      "description": "Pão de forma com manteiga, queijo mussarela e presunto.",
+      "category": "Cafeteria",
+      "price": "34.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Waffle com Cobertura de Chocolate Lugano",
+      "description": "Waffle quentinho com chocolate Lugano derretido.",
+      "category": "Cafeteria",
+      "price": "27.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Waffle Pão de Queijo",
+      "description": "Delicioso Waffle de Pão de Queijo Quentinho",
+      "category": "Cafeteria",
+      "price": "21.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Waffle Recheado de Banana",
+      "description": "Delicioso Waffle recheado com bananas picados e doce de leite.",
+      "category": "Cafeteria",
+      "price": "34.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Waffle Recheado de Morango",
+      "description": "Delicioso Waffle recheado com morangos picados e chocolate Lugano",
+      "category": "Cafeteria",
+      "price": "38.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Wrap de Frango",
+      "description": "Delicioso wrap de frango desfiado, milho, cenoura, alface e maionese.",
+      "category": "Cafeteria",
+      "price": "23.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Croque Madame",
+      "description": "Típico sanduíche francês feito com pão de forma, peito de peru, queijo, requeijão e finalizado com ovo frito.",
+      "category": "Cafeteria",
+      "price": "44.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Spaghetti ao Sugo",
+      "description": "180g massa tipo spaghetti ao sugo(tomate pilat), adicionados manjericão e queijo parmesão ralado!!",
+      "category": "Massas Lugano",
+      "price": "47.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Barra de Chocolate 70% Cacau 20g",
+      "description": null,
+      "category": "Barras",
+      "price": "11.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Barra de Chocolate 50% Cacau 20g",
+      "description": null,
+      "category": "Barras",
+      "price": "11.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Barra de Chocolate 50% Cacau Menta Lugano 20g",
+      "description": null,
+      "category": "Barras",
+      "price": "11.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Barra de Chocolate ao Leite Lugano 20g",
+      "description": null,
+      "category": "Barras",
+      "price": "10.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Barra de Chocolate ao Leite Lugano com Avelã 20g",
+      "description": null,
+      "category": "Barras",
+      "price": "10.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Barra ao Leite com Castanha de Caju 20g",
+      "description": null,
+      "category": "Barras",
+      "price": "10.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Barra de Chocolate ao Leite Lugano com Crocantes 20g",
+      "description": null,
+      "category": "Barras",
+      "price": "10.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Barra de Chocolate Branco Lugano 20g",
+      "description": null,
+      "category": "Barras",
+      "price": "10.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Barra de Chocolate Branco Lugano com Cookies 20g",
+      "description": null,
+      "category": "Barras",
+      "price": "10.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Rama ao Leite Lugano 35g",
+      "description": null,
+      "category": "Barras",
+      "price": "20.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Bombom Cremoso de Chocolate ao Leite com Brigadeiro 13g",
+      "description": null,
+      "category": "Bombons",
+      "price": "8.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Bombom Cremoso de Chocolate ao Leite com Creme Russo 13g",
+      "description": null,
+      "category": "Bombons",
+      "price": "8.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Bombom de Chocolate ao Leite com Licor de Cereja 15g",
+      "description": null,
+      "category": "Bombons",
+      "price": "8.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Bombom Recheado de Chocolate ao Leite Lugano 13g",
+      "description": null,
+      "category": "Bombons",
+      "price": "8.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Bombom Recheado de Chocolate ao Leite Sabor Banana 13g",
+      "description": null,
+      "category": "Bombons",
+      "price": "8.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Bombom Recheado de Chocolate Branco Lugano com Amêndoas 13g",
+      "description": null,
+      "category": "Bombons",
+      "price": "8.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Bombom Recheado de Chocolate Lugano Mesclado com Rum 13g",
+      "description": null,
+      "category": "Bombons",
+      "price": "8.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Alfajor Amendoim 60g",
+      "description": "Alfajor de chocolate ao leite 36% cacau com recheio de creme de amendoim.",
+      "category": "Chocolataria - Destaques",
+      "price": "23.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Alfajor ao leite tradicional 60g",
+      "description": null,
+      "category": "Chocolataria - Destaques",
+      "price": "23.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Alfajor de Pistache 60g",
+      "description": "Alfajor de Chocolate branco 32% cacau com recheio de creme de pistache.",
+      "category": "Chocolataria - Destaques",
+      "price": "23.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Paçoca com Chocolate 100g",
+      "description": "Paçoca de amendoim coberta com chocolate ao leite 36% cacau.",
+      "category": "Chocolataria - Destaques",
+      "price": "43.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Alfajor Branco Tradicional 60g",
+      "description": null,
+      "category": "Chocolataria - Destaques",
+      "price": "23.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Alfajor 70% Cacau Trufado 60g",
+      "description": null,
+      "category": "Chocolataria - Destaques",
+      "price": "23.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Bombons Finos de Chocolate 234g",
+      "description": "O kit é composto por: 03 Bombons Recheados de Chocolate ao Leite Lugano com Amêndoas 13g 03 Bombons Recheados de Chocolate ao Leite Lugano com Café 13g 03 Bombons Recheados de Chocolate ao Leite Lugano Sabor Banana 13g 03 Bombons Recheados de Chocolate ao Leite Lugano Sabor Laranja 13g 03 Bombons Recheados de Chocolate ao Leite Lugano Sabor Rum 13g",
+      "category": "Chocolataria - Destaques",
+      "price": "119.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Coração Laminado Ao Leite 50g",
+      "description": null,
+      "category": "Chocolataria - Destaques",
+      "price": "39.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Coração Pequeno Ao Leite 10g",
+      "description": "Unidade",
+      "category": "Chocolataria - Destaques",
+      "price": "8.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Gato Mimi de Chocolate ao Leite 70g",
+      "description": null,
+      "category": "Chocolataria - Destaques",
+      "price": "59.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Lata Borboleta 156g",
+      "description": "Lata Borboleta com 12 bombons recheados de 13g",
+      "category": "Chocolataria - Destaques",
+      "price": "179.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Pirulito Rosa de Chocolate ao Leite 30g",
+      "description": "Unidade",
+      "category": "Chocolataria - Destaques",
+      "price": "29.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Barra 33% sem açúcar/lactose 90g",
+      "description": null,
+      "category": "Chocolataria - Saudáveis",
+      "price": "47.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Trufas Diversas 14g und",
+      "description": null,
+      "category": "Chocolataria - Trufas",
+      "price": "8.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Drágea 70% cacau 70g",
+      "description": "Flocos crocantes com chocolate 70% cacau",
+      "category": "Drágeas",
+      "price": "44.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Coca Cola Lata 350ml",
+      "description": null,
+      "category": "Bebidas",
+      "price": "11.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Guaraná Kuat Lata 350ml",
+      "description": null,
+      "category": "Bebidas",
+      "price": "11.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Suco de Laranja",
+      "description": null,
+      "category": "Bebidas",
+      "price": "17.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Água Com Gás 500ml",
+      "description": null,
+      "category": "Bebidas",
+      "price": "9.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Água Sem Gás 500ml",
+      "description": null,
+      "category": "Bebidas",
+      "price": "9.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Vinho Carbenet Sauvignon Suave 750ml",
+      "description": "Vinho que apresenta uma ótima expressão varietal, com intensidade de frutas como amora, framboesa, morango, cassis e evolução para cacau e especiarias como cravo da índia. Safra 2023 Vinho Tinto - 750 m",
+      "category": "Licores & Vinhos",
+      "price": "110.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Vinho Lugano Chardonay 375ml",
+      "description": "Amarelo palha com reflexos brilhantes dourados e esverdeados, como lágrimas densas e preguiçosas. Pleno, com intenso ataque em todos os níveis sensoriais do paladar, promovendo uma sensação envolvente devido ao ótimo volume de boca e retrogosto agradável e prolongado. Safra 2022 Vinho Branco - 375ml **92 pontos Jancis Robinson.",
+      "category": "Licores & Vinhos",
+      "price": "92.30",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Vinho Lugano Espumante Brut 750ml",
+      "description": "Vinho de perfil aromático é delicado e elegante, com notas de flores brancas e de frutas como pera e melão, com um toque cítrico de limão siciliano e maçã verde. No paladar possui grande vivacidade, é equilibrado, com uma boa cremosidade e volume de boca. Retrogosto essencialmente frutado e refrescante. Garrafa de 750ml",
+      "category": "Licores & Vinhos",
+      "price": "118.70",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Vinho Merlot & Carbenet Sauvignon 375ml",
+      "description": "Vinho de corpo médio, é macio e frutado, reflete equilíbrio e complexidade, com tannos maduros e retrogosto agradável e persistente. É a junção de duas importantes castas Merlot e Cabernet Sauvignon. Safra 2022 Vinho Tinto - 375 ml",
+      "category": "Licores & Vinhos",
+      "price": "92.90",
+      "available": true,
+      "image_url": null
+    },
+    {
+      "name": "Vinho Merlot 750ml",
+      "description": "Vinho com entrada em boca expressiva, com uma sensação marcante de frutas com evolução para especiarias no retrogosto. Bom corpo e volume de boca, com taninos integrados e maduros. Safra 2022 Vinho Tinto - 750 ml",
+      "category": "Licores & Vinhos",
+      "price": "118.90",
+      "available": true,
+      "image_url": null
+    }
+  ],
+  "promotions": [
+    {
+      "code": "LUGANO10",
+      "description": "10% de desconto no pedido",
+      "type": "percentage",
+      "value": "10.00",
+      "min_order_cents": 3000,
+      "max_uses": 500,
+      "active": true
+    },
+    {
+      "code": "FRETEGRATIS",
+      "description": "Frete gratis em pedidos selecionados",
+      "type": "free_delivery",
+      "value": "0.00",
+      "min_order_cents": 4000,
+      "max_uses": 300,
+      "active": true
+    },
+    {
+      "code": "BOASVINDAS",
+      "description": "R$ 5,00 de desconto para novos clientes",
+      "type": "fixed",
+      "value": "5.00",
+      "min_order_cents": 2500,
+      "max_uses": 300,
+      "active": true
+    }
+  ],
+  "operational_settings": [
+    {
+      "key": "delivery_base_fee",
+      "value": 500,
+      "description": "Frete base em centavos"
+    },
+    {
+      "key": "delivery_free_threshold",
+      "value": 5000,
+      "description": "Pedido minimo em centavos para frete gratis"
+    },
+    {
+      "key": "points_per_real",
+      "value": 10,
+      "description": "Pontos concedidos por R$ 1,00 gasto"
+    },
+    {
+      "key": "business_hours",
+      "value": {
+        "timezone": "America/Fortaleza",
+        "weekly": {
+          "monday": ["09:00", "20:00"],
+          "tuesday": ["09:00", "20:00"],
+          "wednesday": ["09:00", "20:00"],
+          "thursday": ["09:00", "20:00"],
+          "friday": ["09:00", "21:00"],
+          "saturday": ["10:00", "21:00"],
+          "sunday": ["10:00", "18:00"]
+        }
+      },
+      "description": "Horario operacional padrao"
+    },
+    {
+      "key": "notifications",
+      "value": {
+        "email_enabled": true,
+        "whatsapp_enabled": true
+      },
+      "description": "Preferencia inicial de canais transacionais"
+    }
+  ]
+}

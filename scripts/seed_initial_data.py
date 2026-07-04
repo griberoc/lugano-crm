@@ -25,6 +25,7 @@ class SeedConfig:
     owner_full_name: str = "Owner Lugano"
     seed_file: Path = DEFAULT_SEED_FILE
     dry_run: bool = False
+    disable_missing_products: bool = False
 
 
 def load_dotenv(path: Path, *, override: bool = False) -> None:
@@ -288,6 +289,44 @@ def seed_collection(
     print_step(f"{table} seed", {"count": len(items)})
 
 
+def disable_products_not_in_seed(
+    client: httpx.Client,
+    config: SeedConfig,
+    products: list[dict[str, Any]],
+) -> None:
+    seed_names = {str(item["name"]) for item in products}
+    existing_products = request_json(
+        client,
+        "GET",
+        "/rest/v1/products",
+        expected_status=200,
+        headers=service_headers(config.supabase_service_role_key),
+        params={"select": "name,available"},
+    )
+    products_to_disable = [
+        product
+        for product in existing_products
+        if product.get("name") not in seed_names and product.get("available") is not False
+    ]
+    headers = service_headers(
+        config.supabase_service_role_key,
+        prefer="return=minimal",
+    )
+
+    for product in products_to_disable:
+        request_json(
+            client,
+            "PATCH",
+            "/rest/v1/products",
+            expected_status={200, 204},
+            headers=headers,
+            params={"name": f"eq.{product['name']}"},
+            json={"available": False},
+        )
+
+    print_step("products fora do seed desativados", {"count": len(products_to_disable)})
+
+
 def seed_operational_settings(
     client: httpx.Client,
     config: SeedConfig,
@@ -314,6 +353,7 @@ def run_seed(config: SeedConfig) -> None:
                 "promotions": len(seed_data["promotions"]),
                 "operational_settings": len(seed_data["operational_settings"]),
                 "owner_email": config.owner_email,
+                "disable_missing_products": config.disable_missing_products,
             },
         )
         return
@@ -327,6 +367,8 @@ def run_seed(config: SeedConfig) -> None:
             seed_data["loyalty_tiers"],
         )
         seed_collection(client, config, "products", "name", seed_data["products"])
+        if config.disable_missing_products:
+            disable_products_not_in_seed(client, config, seed_data["products"])
         seed_collection(client, config, "promotions", "code", seed_data["promotions"])
         seed_operational_settings(
             client,
@@ -357,6 +399,7 @@ def build_config(args: argparse.Namespace) -> SeedConfig:
         ) or "Owner Lugano",
         seed_file=Path(args.seed_file).resolve(),
         dry_run=args.dry_run,
+        disable_missing_products=args.disable_missing_products,
     )
 
 
@@ -372,6 +415,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--owner-full-name")
     parser.add_argument("--seed-file", default=str(DEFAULT_SEED_FILE))
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--disable-missing-products",
+        action="store_true",
+        help="Marca como indisponiveis os produtos que nao aparecem no seed.",
+    )
     return parser.parse_args()
 
 

@@ -6,6 +6,7 @@ import httpx
 from scripts.seed_initial_data import (
     SeedConfig,
     build_config,
+    disable_products_not_in_seed,
     ensure_owner_profile_and_role,
     ensure_owner_user,
     load_seed_file,
@@ -44,6 +45,7 @@ def seed_config(**overrides):
         owner_email="owner@lugano.test",
         owner_password="secret-password",
         owner_full_name="Owner Lugano",
+        disable_missing_products=False,
         **overrides,
     )
 
@@ -120,6 +122,37 @@ def test_upsert_by_field_updates_existing_record():
     assert requests == [("GET", "/rest/v1/products"), ("PATCH", "/rest/v1/products")]
 
 
+def test_disable_products_not_in_seed_marks_only_extra_available_products():
+    requests = []
+
+    def handler(request):
+        requests.append((request.method, request.url.path, dict(request.url.params)))
+        if request.method == "GET":
+            return httpx.Response(
+                200,
+                json=[
+                    {"name": "Brownie", "available": True},
+                    {"name": "Produto antigo", "available": True},
+                    {"name": "Produto ja indisponivel", "available": False},
+                ],
+            )
+        if request.method == "PATCH":
+            return httpx.Response(204)
+        return httpx.Response(500)
+
+    with mock_client(handler) as client:
+        disable_products_not_in_seed(
+            client,
+            seed_config(),
+            [{"name": "Brownie"}],
+        )
+
+    assert requests == [
+        ("GET", "/rest/v1/products", {"select": "name,available"}),
+        ("PATCH", "/rest/v1/products", {"name": "eq.Produto antigo"}),
+    ]
+
+
 def test_ensure_owner_user_creates_when_missing():
     def handler(request):
         if request.method == "GET" and request.url.path == "/auth/v1/admin/users":
@@ -170,6 +203,7 @@ def test_build_config_reads_seed_owner_env(monkeypatch, tmp_path):
         owner_full_name=None,
         seed_file=str(seed_file),
         dry_run=False,
+        disable_missing_products=False,
     )
 
     config = build_config(args)

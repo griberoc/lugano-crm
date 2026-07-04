@@ -19,6 +19,10 @@ REQUIRED_MIGRATIONS = (
     "006_security_hardening.sql",
     "007_notifications.sql",
     "008_audit_logs.sql",
+    "009_operational_settings.sql",
+    "010_data_retention.sql",
+    "011_payments.sql",
+    "012_sensitive_rls_lockdown.sql",
 )
 
 REQUIRED_TABLES = (
@@ -317,12 +321,12 @@ def check_local_migration_files(
         add_result(
             results,
             "fail",
-            "Migration files 001-008",
+            "Migration files 001-012",
             "arquivos ausentes: " + ", ".join(missing),
         )
         return
 
-    add_result(results, "ok", "Migration files 001-008", "arquivos locais presentes")
+    add_result(results, "ok", "Migration files 001-012", "arquivos locais presentes")
 
 
 def parse_body(response: httpx.Response) -> Any:
@@ -377,7 +381,7 @@ def check_remote_migrations(
         add_result(
             results,
             status,
-            "Migrations remotas 001-008",
+            "Migrations remotas 001-012",
             "puladas: configure SUPABASE_URL, anon e service role reais",
         )
         return
@@ -407,7 +411,7 @@ def check_remote_migrations(
         add_result(
             results,
             "fail",
-            "Migrations remotas 001-008",
+            "Migrations remotas 001-012",
             "; ".join(errors),
         )
         return
@@ -415,7 +419,7 @@ def check_remote_migrations(
     add_result(
         results,
         "ok",
-        "Migrations remotas 001-008",
+        "Migrations remotas 001-012",
         "tabelas/colunas esperadas respondem no Supabase",
     )
 
