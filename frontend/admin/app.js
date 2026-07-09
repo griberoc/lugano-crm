@@ -561,20 +561,28 @@ function renderOrderDetail() {
 
 function renderProducts() {
   $("#products-list").innerHTML = state.products
-    .map(
-      (product) => `
-        <article class="list-item">
-          <div class="list-item-header">
-            <strong>${product.name}</strong>
-            <span>${money(product.price)}</span>
+    .map((product) => {
+      const initial = String(product.name || "L").trim().slice(0, 1).toUpperCase();
+      const thumb = product.image_url
+        ? `<img src="${product.image_url}" alt="${product.name}" loading="lazy" />`
+        : `<span>${initial}</span>`;
+
+      return `
+        <article class="list-item product-list-item">
+          <figure class="product-thumb">${thumb}</figure>
+          <div class="product-list-content">
+            <div class="list-item-header">
+              <strong>${product.name}</strong>
+              <span>${money(product.price)}</span>
+            </div>
+            <span class="muted">${product.category}</span>
+            <span class="status ${product.available ? "active" : ""}">
+              ${product.available ? "disponivel" : "indisponivel"}
+            </span>
           </div>
-          <span class="muted">${product.category}</span>
-          <span class="status ${product.available ? "active" : ""}">
-            ${product.available ? "disponivel" : "indisponivel"}
-          </span>
         </article>
-      `,
-    )
+      `;
+    })
     .join("");
 }
 

@@ -258,9 +258,15 @@ function renderProducts() {
     : state.products;
 
   $("#product-grid").innerHTML = products
-    .map(
-      (product) => `
-        <article class="product-card">
+    .map((product) => {
+      const initial = String(product.name || "L").trim().slice(0, 1).toUpperCase();
+      const productMedia = product.image_url
+        ? `<figure class="product-media"><img src="${product.image_url}" alt="${product.name}" loading="lazy" /></figure>`
+        : `<figure class="product-media product-media-fallback" aria-hidden="true"><span>${initial}</span></figure>`;
+
+      return `
+        <article class="product-card has-image">
+          ${productMedia}
           <span class="muted">${product.category}</span>
           <strong>${product.name}</strong>
           <p>${product.description || ""}</p>
@@ -269,8 +275,8 @@ function renderProducts() {
             Adicionar ao pedido
           </button>
         </article>
-      `,
-    )
+      `;
+    })
     .join("");
 }
 

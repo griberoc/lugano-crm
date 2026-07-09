@@ -1,0 +1,91 @@
+:root {
+  color-scheme: light;
+  --surface: #f9f9f9;
+  --surface-dim: #dadada;
+  --surface-bright: #f9f9f9;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f3f3f3;
+  --surface-container: #f0f0f0;
+  --surface-container-high: #eaeaea;
+  --surface-container-highest: #e3e3e3;
+  --on-surface: #1c1b1b;
+  --on-surface-variant: #444746;
+  --outline: #747775;
+  --outline-variant: #c4c7c5;
+  --primary: #42322e;
+  --on-primary: #ffffff;
+  --primary-container: #5b4843;
+  --on-primary-container: #ffdbd1;
+  --secondary: #a68a7b;
+  --secondary-container: #f3e6e1;
+  --tertiary: #8b7a5e;
+  --tertiary-container: #f2e1c3;
+  --error: #ba1a1a;
+  --error-container: #ffdad6;
+  --caramel-gold: #c5a059;
+  --cream-base: #fdfcf0;
+  --cacao-deep: #2d1f1b;
+  --success: #2f725f;
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --container-max: 1280px;
+  --page-margin: clamp(16px, 4vw, 80px);
+  --gutter: 24px;
+  --heritage-shadow: 0 22px 58px rgba(45, 31, 27, 0.12);
+  --heritage-shadow-soft: 0 12px 32px rgba(45, 31, 27, 0.08);
+}
+
+* {
+  letter-spacing: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--cream-base);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+.brand strong,
+.login-copy h1,
+.home-copy h1,
+.hero-copy h1,
+.spotlight-copy h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid rgba(197, 160, 89, 0.62);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: rgba(197, 160, 89, 0.34);
+  color: var(--cacao-deep);
+}
+
+.section-kicker,
+.eyebrow,
+.hero-copy span,
+.home-copy span,
+.login-copy span,
+.login-card-header span {
+  color: var(--caramel-gold);
+}
