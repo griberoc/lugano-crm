@@ -112,6 +112,12 @@ function saveSession() {
   localStorage.setItem("lugano.customer.session", JSON.stringify(state.session));
 }
 
+function notifySessionChanged() {
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({ type: "lugano.customer.session.changed" }, window.location.origin);
+  }
+}
+
 function splitList(value) {
   return String(value || "")
     .split(",")
@@ -122,6 +128,7 @@ function splitList(value) {
 function renderSession() {
   const email = state.session?.user?.email || state.profile?.email;
   const firstName = state.profile?.full_name?.split(" ")[0];
+  $("#account-access-panel")?.classList.toggle("hidden", Boolean(state.session));
   $("#session-label").textContent = email || "Visitante";
   $("#logout-button").classList.toggle("hidden", !state.session);
   $("#auth-summary").textContent = email
@@ -377,6 +384,7 @@ function logout() {
   state.transactions = [];
   state.addresses = [];
   saveSession();
+  notifySessionChanged();
   clearAddressForm();
   renderAll();
 }

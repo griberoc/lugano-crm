@@ -39,6 +39,12 @@ function saveSession() {
   localStorage.setItem("lugano.customer.session", JSON.stringify(state.session));
 }
 
+function notifySessionChanged() {
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({ type: "lugano.customer.session.changed" }, window.location.origin);
+  }
+}
+
 function authHeaders() {
   return state.session?.access_token
     ? { Authorization: `Bearer ${state.session.access_token}` }
@@ -132,6 +138,7 @@ async function login(event) {
   try {
     state.session = await supabaseAuth("token?grant_type=password", formData(form));
     saveSession();
+    notifySessionChanged();
     form.reset();
     renderSession();
     showNotice("Login realizado.");
@@ -172,6 +179,7 @@ async function signup(event) {
 
     state.session = session;
     saveSession();
+    notifySessionChanged();
     renderSession();
     setAuthMode("login");
 
@@ -196,6 +204,7 @@ async function signup(event) {
 function logout() {
   state.session = null;
   saveSession();
+  notifySessionChanged();
   renderSession();
   showNotice("Sessao encerrada.");
 }
