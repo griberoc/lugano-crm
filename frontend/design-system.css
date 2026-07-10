@@ -89,3 +89,69 @@ h3,
 .login-card-header span {
   color: var(--caramel-gold);
 }
+
+.whatsapp-contact-button {
+  position: fixed;
+  left: clamp(14px, 3vw, 28px);
+  bottom: clamp(14px, 3vw, 28px);
+  z-index: 40;
+  display: inline-grid;
+  grid-template-columns: 42px auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: var(--radius-md);
+  background: #1f7a55;
+  box-shadow: 0 18px 42px rgba(31, 122, 85, 0.24);
+  color: #ffffff;
+  padding: 8px 16px 8px 9px;
+  text-decoration: none;
+}
+
+.whatsapp-contact-button:hover {
+  background: #176a49;
+}
+
+.whatsapp-contact-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.whatsapp-contact-copy {
+  display: grid;
+  gap: 1px;
+}
+
+.whatsapp-contact-copy small {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.whatsapp-contact-copy strong {
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1.1;
+}
+
+@media (max-width: 560px) {
+  .whatsapp-contact-button {
+    grid-template-columns: 38px auto;
+    min-height: 52px;
+    padding-right: 13px;
+  }
+
+  .whatsapp-contact-icon {
+    width: 38px;
+    height: 38px;
+  }
+}

@@ -3,4 +3,6 @@ window.LUGANO_CONFIG = {
   adminApiBaseUrl: "",
   supabaseUrl: "https://seu-projeto.supabase.co",
   supabaseAnonKey: "sua-chave-anon-publica",
+  whatsappPhone: "5598999999999",
+  whatsappMessage: "Ola, Lugano Sao Luis! Gostaria de atendimento.",
 };
