@@ -9,13 +9,15 @@ const routes = {
   },
   delivery: {
     title: "Delivery",
-    frame: "../orders/index.html?v=checkout-20260703-2",
+    frame: "../orders/index.html?v=checkout-20260805-1",
   },
   painel: {
     title: "Painel",
     frame: "../customer/index.html?v=profile-20260703-2",
   },
 };
+
+const RETURN_AFTER_LOGIN_KEY = "lugano.customer.returnAfterLogin";
 
 const homeView = document.querySelector("#home-view");
 const moduleView = document.querySelector("#module-view");
@@ -35,6 +37,12 @@ function customerSession() {
 
 function isCustomerLoggedIn() {
   return Boolean(customerSession()?.access_token);
+}
+
+function consumeReturnAfterLogin() {
+  const route = localStorage.getItem(RETURN_AFTER_LOGIN_KEY);
+  localStorage.removeItem(RETURN_AFTER_LOGIN_KEY);
+  return route && routes[route] && route !== "acesso" ? route : "painel";
 }
 
 function currentRoute() {
@@ -64,7 +72,7 @@ function renderAuthVisibility() {
 function renderRoute() {
   const route = currentRoute();
   if (route === "acesso" && isCustomerLoggedIn()) {
-    window.location.hash = "#/painel";
+    window.location.hash = `#/${consumeReturnAfterLogin()}`;
     return;
   }
 

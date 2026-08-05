@@ -2,6 +2,7 @@ const runtimeConfig = window.LUGANO_CONFIG || {};
 const DEFAULT_API_URL = runtimeConfig.apiBaseUrl || "http://127.0.0.1:8000";
 const DEFAULT_SUPABASE_URL = runtimeConfig.supabaseUrl || "";
 const DEFAULT_SUPABASE_ANON_KEY = runtimeConfig.supabaseAnonKey || "";
+const RETURN_AFTER_LOGIN_KEY = "lugano.customer.returnAfterLogin";
 
 function clearLegacyTechnicalConfig() {
   localStorage.removeItem("lugano.customer.apiBaseUrl");
@@ -128,6 +129,10 @@ function formData(form) {
 function saveState() {
   localStorage.setItem("lugano.customer.cart", JSON.stringify(state.cart));
   localStorage.setItem("lugano.customer.session", JSON.stringify(state.session));
+}
+
+function rememberDeliveryReturn() {
+  localStorage.setItem(RETURN_AFTER_LOGIN_KEY, "delivery");
 }
 
 function cartSubtotal() {
@@ -576,6 +581,7 @@ async function checkout() {
 
 function validateCheckout() {
   if (!state.session) {
+    rememberDeliveryReturn();
     showNotice("Entre antes de finalizar.", "error");
     return false;
   }
@@ -673,10 +679,12 @@ function bindEvents() {
     const addButton = event.target.closest("[data-add-product]");
     const decreaseButton = event.target.closest("[data-decrease-product]");
     const removeButton = event.target.closest("[data-remove-product]");
+    const returnAfterLoginLink = event.target.closest("[data-return-after-login]");
     if (stepButton) goToStep(stepButton.dataset.goStep);
     if (addButton) addToCart(addButton.dataset.addProduct);
     if (decreaseButton) decreaseCartItem(decreaseButton.dataset.decreaseProduct);
     if (removeButton) removeFromCart(removeButton.dataset.removeProduct);
+    if (returnAfterLoginLink) rememberDeliveryReturn();
   });
 }
 
