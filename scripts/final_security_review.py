@@ -481,45 +481,62 @@ def check_owner_via_service_role(
         return "owner email ausente"
 
     assert config.supabase_service_role_key
-    profiles = supabase.get(
-        "/rest/v1/profiles",
-        headers=service_headers(config.supabase_service_role_key),
-        params={
-            "select": "id,email",
-            "email": f"eq.{config.admin_email}",
-            "limit": "1",
-        },
-    )
-    if profiles.status_code >= 400:
-        return f"profiles retornou {profiles.status_code}: {parse_body(profiles)}"
-
-    profile_rows = parse_body(profiles)
-    if not profile_rows:
-        return "perfil do owner nao encontrado em public.profiles"
-
-    profile_id = profile_rows[0]["id"]
+    normalized_email = config.admin_email.strip().casefold()
     admin_users = supabase.get(
         "/rest/v1/admin_users",
         headers=service_headers(config.supabase_service_role_key),
         params={
             "select": "profile_id,role,active",
-            "profile_id": f"eq.{profile_id}",
-            "limit": "1",
+            "role": "eq.owner",
+            "active": "eq.true",
         },
     )
     if admin_users.status_code >= 400:
-        body = parse_body(admin_users)
-        return f"admin_users retornou {admin_users.status_code}: {body}"
+        return f"admin_users retornou {admin_users.status_code}"
 
     admin_rows = parse_body(admin_users)
-    if not admin_rows:
-        return "registro do owner nao encontrado em public.admin_users"
+    if not isinstance(admin_rows, list) or not admin_rows:
+        return "owner ativo nao encontrado em public.admin_users"
 
-    admin = admin_rows[0]
-    if admin.get("role") != "owner" or admin.get("active") is not True:
-        return f"owner invalido: role={admin.get('role')} active={admin.get('active')}"
+    profiles_found = 0
+    profiles_with_email = 0
+    for admin in admin_rows:
+        profile_id = admin.get("profile_id")
+        if not profile_id:
+            continue
+        profiles = supabase.get(
+            "/rest/v1/profiles",
+            headers=service_headers(config.supabase_service_role_key),
+            params={
+                "select": "id,email",
+                "id": f"eq.{profile_id}",
+                "limit": "1",
+            },
+        )
+        if profiles.status_code >= 400:
+            return f"profiles retornou {profiles.status_code}"
 
-    return None
+        profile_rows = parse_body(profiles)
+        if not isinstance(profile_rows, list):
+            continue
+        profiles_found += len(profile_rows)
+        profiles_with_email += sum(bool(profile.get("email")) for profile in profile_rows)
+        if any(
+            str(profile.get("email", "")).strip().casefold() == normalized_email
+            for profile in profile_rows
+        ):
+            return None
+
+    if profiles_found == 0:
+        return (
+            "profile_id de owner ativo nao foi encontrado em public.profiles "
+            f"(owners={len(admin_rows)})"
+        )
+    return (
+        "email configurado nao corresponde aos perfis de owner ativos "
+        f"(owners={len(admin_rows)}, profiles={profiles_found}, "
+        f"profiles_com_email={profiles_with_email})"
+    )
 
 
 def check_owner_via_admin_login(
@@ -534,7 +551,7 @@ def check_owner_via_admin_login(
         json={"email": config.admin_email, "password": config.admin_password},
     )
     if response.status_code != 200:
-        return f"login admin retornou {response.status_code}: {parse_body(response)}"
+        return f"login admin retornou HTTP {response.status_code}"
 
     body = parse_body(response)
     admin = body.get("admin") or {}
