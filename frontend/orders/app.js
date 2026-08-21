@@ -1,5 +1,24 @@
 const runtimeConfig = window.LUGANO_CONFIG || {};
 const DEFAULT_API_URL = runtimeConfig.apiBaseUrl || "http://127.0.0.1:8000";
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>'"]/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "'": "&#39;",
+    '"': "&quot;",
+  })[character]);
+}
+
+function safeHttpUrl(value) {
+  try {
+    const url = new URL(value);
+    return ["https:", "http:"].includes(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
+}
 const DEFAULT_SUPABASE_URL = runtimeConfig.supabaseUrl || "";
 const DEFAULT_SUPABASE_ANON_KEY = runtimeConfig.supabaseAnonKey || "";
 
@@ -226,7 +245,7 @@ function renderCategoryFilter() {
   const current = $("#category-filter").value;
   $("#category-filter").innerHTML = [
     '<option value="">Todas as categorias</option>',
-    ...categories().map((category) => `<option value="${category}">${category}</option>`),
+    ...categories().map((category) => `<option value="${escapeHTML(category)}">${escapeHTML(category)}</option>`),
   ].join("");
   $("#category-filter").value = current;
 }
@@ -241,11 +260,11 @@ function renderProducts() {
     .map(
       (product) => `
         <article class="product-card">
-          <span class="muted">${product.category}</span>
-          <strong>${product.name}</strong>
-          <p>${product.description || ""}</p>
+          <span class="muted">${escapeHTML(product.category)}</span>
+          <strong>${escapeHTML(product.name)}</strong>
+          <p>${escapeHTML(product.description)}</p>
           <span class="product-price">${money(product.price)}</span>
-          <button class="primary-button" data-add-product="${product.id}" type="button">
+          <button class="primary-button" data-add-product="${escapeHTML(product.id)}" type="button">
             Adicionar ao pedido
           </button>
         </article>
@@ -262,12 +281,12 @@ function renderCart() {
           (item) => `
             <article class="cart-item">
               <div class="cart-row">
-                <strong>${item.name}</strong>
+                <strong>${escapeHTML(item.name)}</strong>
                 <div class="quantity-actions">
-                  <button class="small-button" data-decrease-product="${item.id}" type="button">-</button>
+                  <button class="small-button" data-decrease-product="${escapeHTML(item.id)}" type="button">-</button>
                   <span>${item.quantity}</span>
-                  <button class="small-button" data-add-product="${item.id}" type="button">+</button>
-                  <button class="small-button" data-remove-product="${item.id}" type="button">Remover</button>
+                  <button class="small-button" data-add-product="${escapeHTML(item.id)}" type="button">+</button>
+                  <button class="small-button" data-remove-product="${escapeHTML(item.id)}" type="button">Remover</button>
                 </div>
               </div>
               <div class="cart-row">
@@ -303,8 +322,8 @@ function renderAddresses() {
     ? state.addresses
         .map(
           (address) => `
-            <option value="${address.id}">
-              ${address.label} - ${address.street}, ${address.number}
+            <option value="${escapeHTML(address.id)}">
+              ${escapeHTML(address.label)} - ${escapeHTML(address.street)}, ${escapeHTML(address.number)}
             </option>
           `,
         )
@@ -361,7 +380,12 @@ function renderLastOrder() {
 function renderPaymentInstructions(instructions) {
   const panel = $("#payment-instructions");
   const pixBox = $("#pix-copy-box");
+  const mercadoPagoBox = $("#mp-payment-box");
+  const paymentUrl = $("#payment-url");
+  const qrImage = $("#pix-qr-code");
   const pixCode = instructions?.pix_copy_paste || "";
+  const qrBase64 = instructions?.pix_qr_code_base64 || "";
+  const ticketUrl = safeHttpUrl(instructions?.payment_url || "");
 
   if (!instructions) {
     panel.classList.add("hidden");
@@ -373,6 +397,23 @@ function renderPaymentInstructions(instructions) {
   $("#payment-instructions-description").textContent = instructions.description || "";
   pixBox.classList.toggle("hidden", !pixCode);
   $("#pix-copy-paste").value = pixCode;
+
+  mercadoPagoBox.classList.toggle("hidden", !qrBase64 && !ticketUrl);
+  qrImage.classList.toggle("hidden", !qrBase64);
+  if (qrBase64) {
+    qrImage.src = qrBase64.startsWith("data:image/png;base64,")
+      ? qrBase64
+      : `data:image/png;base64,${qrBase64}`;
+  } else {
+    qrImage.removeAttribute("src");
+  }
+
+  paymentUrl.classList.toggle("hidden", !ticketUrl);
+  if (ticketUrl) {
+    paymentUrl.href = ticketUrl;
+  } else {
+    paymentUrl.removeAttribute("href");
+  }
 }
 
 async function copyPixCode() {
@@ -568,7 +609,7 @@ function openOrderConfirmation() {
   if (!validateCheckout()) return;
 
   $("#confirm-summary").innerHTML = `
-    <div><span>Entrega</span><strong>${formatAddress(selectedAddress())}</strong></div>
+    <div><span>Entrega</span><strong>${escapeHTML(formatAddress(selectedAddress()))}</strong></div>
     <div><span>Pagamento</span><strong>${selectedPaymentLabel()}</strong></div>
     <div><span>Itens</span><strong>${cartQuantity()} item(ns)</strong></div>
     <div><span>Subtotal</span><strong>${moneyCents(cartSubtotalCents())}</strong></div>

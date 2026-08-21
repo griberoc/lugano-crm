@@ -42,6 +42,10 @@ class PaymentInstructions(BaseModel):
     status: PaymentStatus
     pix_key: str | None = None
     pix_copy_paste: str | None = None
+    pix_qr_code_base64: str | None = None
+    payment_url: str | None = None
+    mercado_pago_payment_id: str | None = None
+    status_detail: str | None = None
     amount: Decimal | None = None
     txid: str | None = None
     expires_at: datetime | None = None
