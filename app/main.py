@@ -43,7 +43,6 @@ app.add_middleware(
     trust_proxy_headers=settings.rate_limit_trust_proxy_headers,
 )
 
-app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestLoggingMiddleware)
 
 app.add_middleware(
@@ -53,6 +52,7 @@ app.add_middleware(
     allow_methods=settings.cors_allowed_methods,
     allow_headers=settings.cors_allowed_headers,
 )
+app.add_middleware(SecurityHeadersMiddleware, hsts_enabled=settings.is_deployed)
 
 app.include_router(api_router)
 

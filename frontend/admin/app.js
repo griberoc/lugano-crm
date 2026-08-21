@@ -2,6 +2,12 @@ const runtimeConfig = window.LUGANO_CONFIG || {};
 const DEFAULT_API_URL =
   runtimeConfig.adminApiBaseUrl || runtimeConfig.apiBaseUrl || "http://127.0.0.1:8000";
 
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>'"]/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;",
+  })[character]);
+}
+
 function loadStoredJson(key) {
   try {
     return JSON.parse(localStorage.getItem(key) || "null");
@@ -361,7 +367,7 @@ function renderOverview() {
       (order) => `
         <tr>
           <td>#${shortId(order.id)}</td>
-          <td><span class="status ${order.status}">${orderStatusLabels[order.status] || order.status}</span></td>
+          <td><span class="status ${escapeHTML(order.status)}">${escapeHTML(orderStatusLabels[order.status] || order.status)}</span></td>
           <td>${money(order.total)}</td>
         </tr>
       `,
@@ -374,12 +380,12 @@ function renderOverview() {
       (promotion) => `
         <article class="list-item">
           <div class="list-item-header">
-            <strong>${promotion.code}</strong>
+            <strong>${escapeHTML(promotion.code)}</strong>
             <span class="status ${promotion.active ? "active" : ""}">
               ${promotion.active ? "ativa" : "inativa"}
             </span>
           </div>
-          <span class="muted">${promotion.description || promotion.type}</span>
+          <span class="muted">${escapeHTML(promotion.description || promotion.type)}</span>
         </article>
       `,
     )
@@ -414,21 +420,21 @@ function renderOrders() {
               <div class="queue-card-main">
                 <div>
                   <span class="queue-id">#${shortId(order.id)}</span>
-                  <strong>${customerName(order)}</strong>
+                  <strong>${escapeHTML(customerName(order))}</strong>
                   <p>${formatDateTime(order.placed_at)}</p>
                 </div>
-                <span class="status ${order.status}">${orderStatusLabels[order.status] || order.status}</span>
+                <span class="status ${escapeHTML(order.status)}">${escapeHTML(orderStatusLabels[order.status] || order.status)}</span>
               </div>
               <div class="queue-meta">
                 <span>${orderItemCount(order)} ${orderItemCount(order) === 1 ? "item" : "itens"}</span>
-                <span>${addressSummary(order)}</span>
+                <span>${escapeHTML(addressSummary(order))}</span>
                 <span>${money(order.total)}</span>
               </div>
               <div class="queue-card-footer">
-                <span class="status ${order.payment_status}">${paymentStatusLabels[order.payment_status] || order.payment_status}</span>
+                <span class="status ${escapeHTML(order.payment_status)}">${escapeHTML(paymentStatusLabels[order.payment_status] || order.payment_status)}</span>
                 <div class="table-actions">
-                  <button class="small-button" data-order-select="${order.id}" type="button">Abrir</button>
-                  <button class="small-button primary-action" data-order-next="${order.id}" type="button" ${!next ? "disabled" : ""}>
+                  <button class="small-button" data-order-select="${escapeHTML(order.id)}" type="button">Abrir</button>
+                  <button class="small-button primary-action" data-order-next="${escapeHTML(order.id)}" type="button" ${!next ? "disabled" : ""}>
                     ${next ? orderStatusLabels[next] : "Concluido"}
                   </button>
                 </div>
@@ -466,37 +472,37 @@ function renderOrderDetail() {
     <div class="order-detail-heading detail-hero">
       <div>
         <span class="muted">Pedido #${shortId(order.id)}</span>
-        <h2>${customerName(order)}</h2>
+        <h2>${escapeHTML(customerName(order))}</h2>
         <p>${formatDateTime(order.placed_at)}</p>
       </div>
       <div class="detail-hero-actions">
-        <span class="status ${order.status}">${orderStatusLabels[order.status] || order.status}</span>
+        <span class="status ${escapeHTML(order.status)}">${escapeHTML(orderStatusLabels[order.status] || order.status)}</span>
         <strong>${money(order.total)}</strong>
       </div>
     </div>
 
     <div class="quick-actions">
-      <button class="primary-button" data-order-next="${order.id}" type="button" ${!nextStatus ? "disabled" : ""}>
+      <button class="primary-button" data-order-next="${escapeHTML(order.id)}" type="button" ${!nextStatus ? "disabled" : ""}>
         ${nextStatus ? `Mover para ${orderStatusLabels[nextStatus]}` : "Sem proximo status"}
       </button>
-      <span>${paymentStatusLabels[order.payment_status] || order.payment_status}</span>
+      <span>${escapeHTML(paymentStatusLabels[order.payment_status] || order.payment_status)}</span>
     </div>
 
     <div class="detail-grid">
       <article>
         <span>Cliente</span>
-        <strong>${customerName(order)}</strong>
-        <p>${customerContact(order)}</p>
+        <strong>${escapeHTML(customerName(order))}</strong>
+        <p>${escapeHTML(customerContact(order))}</p>
       </article>
       <article>
         <span>Entrega</span>
-        <strong>${formatAddress(order.address)}</strong>
-        <p>${order.delivery_instructions || order.notes || "Sem observacoes de entrega"}</p>
+        <strong>${escapeHTML(formatAddress(order.address))}</strong>
+        <p>${escapeHTML(order.delivery_instructions || order.notes || "Sem observacoes de entrega")}</p>
       </article>
       <article>
         <span>Pagamento</span>
-        <strong>${paymentMethodLabels[order.payment_method] || order.payment_method}</strong>
-        <p>${paymentStatusLabels[order.payment_status] || order.payment_status}</p>
+        <strong>${escapeHTML(paymentMethodLabels[order.payment_method] || order.payment_method)}</strong>
+        <p>${escapeHTML(paymentStatusLabels[order.payment_status] || order.payment_status)}</p>
       </article>
       <article>
         <span>Total</span>
@@ -518,10 +524,10 @@ function renderOrderDetail() {
                   (item) => `
                     <article class="detail-item-row">
                       <div class="list-item-header">
-                        <strong>${item.product?.name || shortId(item.product_id)}</strong>
+                        <strong>${escapeHTML(item.product?.name || shortId(item.product_id))}</strong>
                         <span>${item.quantity} x ${money(item.unit_price)}</span>
                       </div>
-                      <span class="muted">${item.product?.category || "produto"}${item.customization ? ` - ${item.customization}` : ""}</span>
+                      <span class="muted">${escapeHTML(item.product?.category || "produto")}${item.customization ? ` - ${escapeHTML(item.customization)}` : ""}</span>
                     </article>
                   `,
                 )
@@ -550,10 +556,10 @@ function renderOrderDetail() {
             .join("")}
         </select>
       </label>
-      <label>Observacoes<textarea name="notes" rows="3">${order.notes || ""}</textarea></label>
+      <label>Observacoes<textarea name="notes" rows="3">${escapeHTML(order.notes)}</textarea></label>
       <div class="button-row">
         <button class="primary-button" type="submit">Salvar atualizacao</button>
-        <button class="ghost-button" data-order-next="${order.id}" type="button" ${["delivered", "cancelled"].includes(order.status) ? "disabled" : ""}>Avancar status</button>
+        <button class="ghost-button" data-order-next="${escapeHTML(order.id)}" type="button" ${["delivered", "cancelled"].includes(order.status) ? "disabled" : ""}>Avancar status</button>
       </div>
     </form>
   `;
@@ -565,10 +571,10 @@ function renderProducts() {
       (product) => `
         <article class="list-item">
           <div class="list-item-header">
-            <strong>${product.name}</strong>
+            <strong>${escapeHTML(product.name)}</strong>
             <span>${money(product.price)}</span>
           </div>
-          <span class="muted">${product.category}</span>
+          <span class="muted">${escapeHTML(product.category)}</span>
           <span class="status ${product.available ? "active" : ""}">
             ${product.available ? "disponivel" : "indisponivel"}
           </span>
@@ -583,9 +589,9 @@ function renderCustomers() {
     .map(
       (customer) => `
         <tr>
-          <td>${customer.full_name || "-"}</td>
-          <td>${customer.email || "-"}</td>
-          <td>${customer.phone || "-"}</td>
+          <td>${escapeHTML(customer.full_name || "-")}</td>
+          <td>${escapeHTML(customer.email || "-")}</td>
+          <td>${escapeHTML(customer.phone || "-")}</td>
           <td>${formatDate(customer.created_at)}</td>
         </tr>
       `,
@@ -599,13 +605,13 @@ function renderPromotions() {
       (promotion) => `
         <article class="list-item">
           <div class="list-item-header">
-            <strong>${promotion.code}</strong>
+            <strong>${escapeHTML(promotion.code)}</strong>
             <span class="status ${promotion.active ? "active" : ""}">
               ${promotion.active ? "ativa" : "inativa"}
             </span>
           </div>
-          <span class="muted">${promotion.description || promotion.type}</span>
-          <span>${promotion.type} - ${promotion.value}</span>
+          <span class="muted">${escapeHTML(promotion.description || promotion.type)}</span>
+          <span>${escapeHTML(promotion.type)} - ${escapeHTML(promotion.value)}</span>
         </article>
       `,
     )
@@ -661,8 +667,8 @@ function renderReports() {
           (product) => `
             <tr>
               <td>
-                <strong>${product.product_name}</strong>
-                <span class="table-subtitle">${product.category || "sem categoria"}</span>
+                <strong>${escapeHTML(product.product_name)}</strong>
+                <span class="table-subtitle">${escapeHTML(product.category || "sem categoria")}</span>
               </td>
               <td>${product.quantity_sold}</td>
               <td>${product.orders_count}</td>
@@ -679,8 +685,8 @@ function renderReports() {
           (customer) => `
             <tr>
               <td>
-                <strong>${customer.full_name || customer.email || shortId(customer.profile_id)}</strong>
-                <span class="table-subtitle">${customer.email || customer.phone || "sem contato"}</span>
+                <strong>${escapeHTML(customer.full_name || customer.email || shortId(customer.profile_id))}</strong>
+                <span class="table-subtitle">${escapeHTML(customer.email || customer.phone || "sem contato")}</span>
               </td>
               <td>${customer.orders_count}</td>
               <td>${money(customer.total_spent)}</td>
@@ -697,8 +703,8 @@ function renderReports() {
           (coupon) => `
             <tr>
               <td>
-                <strong>${coupon.code}</strong>
-                <span class="table-subtitle">${coupon.description || "campanha"}</span>
+                <strong>${escapeHTML(coupon.code)}</strong>
+                <span class="table-subtitle">${escapeHTML(coupon.description || "campanha")}</span>
               </td>
               <td>${coupon.uses_count}</td>
               <td>${money(coupon.total_discount)}</td>
@@ -731,16 +737,16 @@ function renderAuditLogs() {
           (log) => `
             <tr>
               <td>${formatDateTime(log.created_at)}</td>
-              <td>${auditActionLabels[log.action] || log.action}</td>
+              <td>${escapeHTML(auditActionLabels[log.action] || log.action)}</td>
               <td>
-                <strong>${auditEntityLabels[log.entity_type] || log.entity_type}</strong>
+                <strong>${escapeHTML(auditEntityLabels[log.entity_type] || log.entity_type)}</strong>
                 <span class="table-subtitle">${shortId(log.entity_id)}</span>
               </td>
               <td>
-                <strong>${log.actor_email || log.actor_role || "Sistema"}</strong>
-                <span class="table-subtitle">${log.actor_profile_id ? shortId(log.actor_profile_id) : log.auth_method || "-"}</span>
+                <strong>${escapeHTML(log.actor_email || log.actor_role || "Sistema")}</strong>
+                <span class="table-subtitle">${escapeHTML(log.actor_profile_id ? shortId(log.actor_profile_id) : log.auth_method || "-")}</span>
               </td>
-              <td>${auditDetails(log)}</td>
+              <td>${escapeHTML(auditDetails(log))}</td>
             </tr>
           `,
         )
@@ -756,10 +762,10 @@ function renderTeam() {
     .map(
       (user) => `
         <tr>
-          <td>${user.full_name || shortId(user.profile_id)}</td>
-          <td>${user.email || "-"}</td>
+          <td>${escapeHTML(user.full_name || shortId(user.profile_id))}</td>
+          <td>${escapeHTML(user.email || "-")}</td>
           <td>
-            <select class="table-control" data-admin-role="${user.profile_id}">
+            <select class="table-control" data-admin-role="${escapeHTML(user.profile_id)}">
               <option value="staff" ${user.role === "staff" ? "selected" : ""}>Staff</option>
               <option value="manager" ${user.role === "manager" ? "selected" : ""}>Manager</option>
               <option value="owner" ${user.role === "owner" ? "selected" : ""}>Owner</option>
@@ -767,14 +773,14 @@ function renderTeam() {
           </td>
           <td>
             <label class="check-row table-check">
-              <input data-admin-active="${user.profile_id}" type="checkbox" ${user.active ? "checked" : ""} />
+              <input data-admin-active="${escapeHTML(user.profile_id)}" type="checkbox" ${user.active ? "checked" : ""} />
               ${user.active ? "Ativo" : "Inativo"}
             </label>
           </td>
           <td>
             <div class="table-actions">
-              <button class="small-button" data-admin-save="${user.profile_id}" type="button">Salvar</button>
-              <button class="small-button danger-button" data-admin-disable="${user.profile_id}" type="button">Desativar</button>
+              <button class="small-button" data-admin-save="${escapeHTML(user.profile_id)}" type="button">Salvar</button>
+              <button class="small-button danger-button" data-admin-disable="${escapeHTML(user.profile_id)}" type="button">Desativar</button>
             </div>
           </td>
         </tr>
