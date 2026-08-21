@@ -80,6 +80,13 @@ def test_check_rls_passes_expected_guards():
                 200,
                 json=[{"id": order_id, "profile_id": customer.user_id}],
             )
+        if path == "/rest/v1/orders" and query.get("profile_id"):
+            return httpx.Response(
+                200,
+                json=[{"id": "other-order-id", "profile_id": "other-profile-id"}],
+            )
+        if path == "/rest/v1/orders" and query.get("id") == "eq.other-order-id":
+            return httpx.Response(200, json=[])
         if path == "/rest/v1/orders":
             return httpx.Response(403, json={"message": "permission denied"})
         if path == "/rest/v1/audit_logs":
@@ -113,6 +120,48 @@ def test_check_rls_fails_when_anon_can_read_orders():
             check_rls(client, config, customer, "order-id")
 
     assert "should be denied" in str(exc_info.value)
+
+
+def test_check_rls_fails_when_customer_can_read_another_order():
+    config = CheckConfig(
+        api_base_url="https://api.test",
+        supabase_url="https://supabase.test",
+        supabase_anon_key="anon",
+        supabase_service_role_key="service",
+        admin_email="owner@test",
+        admin_password="secret",
+    )
+    customer = AuthSession(access_token="customer-token", user_id="profile-id")
+
+    def handler(request):
+        path = request.url.path
+        query = dict(request.url.params)
+        if path == "/rest/v1/products":
+            return httpx.Response(200, json=[])
+        if (
+            path == "/rest/v1/orders"
+            and request.headers.get("authorization") == "Bearer anon"
+        ):
+            return httpx.Response(403)
+        if path == "/rest/v1/orders" and query.get("id") == "eq.own-order":
+            return httpx.Response(
+                200,
+                json=[{"id": "own-order", "profile_id": customer.user_id}],
+            )
+        if path == "/rest/v1/orders" and query.get("profile_id"):
+            return httpx.Response(
+                200,
+                json=[{"id": "other-order", "profile_id": "other-profile"}],
+            )
+        if path == "/rest/v1/orders" and query.get("id") == "eq.other-order":
+            return httpx.Response(200, json=[{"id": "other-order"}])
+        return httpx.Response(403)
+
+    with mock_client(handler) as client:
+        with pytest.raises(CheckError) as exc_info:
+            check_rls(client, config, customer, "own-order")
+
+    assert "exposed an order owned by another profile" in str(exc_info.value)
 
 
 def test_build_config_accepts_customer_access_token(monkeypatch):

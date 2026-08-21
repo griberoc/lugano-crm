@@ -478,6 +478,31 @@ def check_rls(
     if not own_orders or own_orders[0].get("profile_id") != customer.user_id:
         raise CheckError("Customer RLS did not return the created own order.")
 
+    other_order = select_one(
+        supabase,
+        config,
+        "orders",
+        {
+            "select": "id,profile_id",
+            "profile_id": f"neq.{customer.user_id}",
+        },
+    )
+    if not other_order:
+        raise CheckError(
+            "Customer isolation needs an order owned by another profile. "
+            "Create the documented RLS fixture and run the check again."
+        )
+    other_orders = request_json(
+        supabase,
+        "GET",
+        "/rest/v1/orders",
+        expected_status=200,
+        headers=customer_headers,
+        params={"select": "id", "id": f"eq.{other_order['id']}"},
+    )
+    if other_orders:
+        raise CheckError("Customer RLS exposed an order owned by another profile.")
+
     customer_audit = supabase.get(
         "/rest/v1/audit_logs",
         headers=customer_headers,
@@ -486,7 +511,8 @@ def check_rls(
     assert_denied(customer_audit, "Customer audit_logs select")
     print_step(
         "RLS basica",
-        "products anon ok, orders anon denied, own order ok, audit denied",
+        "products anon ok, orders anon denied, own order ok, other order hidden, "
+        "audit denied",
     )
 
 

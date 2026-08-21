@@ -19,6 +19,10 @@ REQUIRED_MIGRATIONS = (
     "006_security_hardening.sql",
     "007_notifications.sql",
     "008_audit_logs.sql",
+    "009_operational_settings.sql",
+    "010_data_retention.sql",
+    "011_payments.sql",
+    "012_delivery_dispatches.sql",
 )
 
 REQUIRED_TABLES = (
@@ -35,7 +39,22 @@ REQUIRED_TABLES = (
     "admin_users",
     "notification_events",
     "audit_logs",
+    "operational_settings",
+    "data_retention_policies",
+    "delivery_dispatches",
 )
+
+REQUIRED_COLUMNS = {
+    "profiles": ("preferences",),
+    "orders": (
+        "payment_provider",
+        "payment_reference",
+        "payment_payload",
+        "paid_at",
+        "archived_at",
+    ),
+    "delivery_dispatches": ("order_id", "provider", "status"),
+}
 
 LOCAL_HOSTS = {"localhost", "0.0.0.0", "127.0.0.1", "::1"}
 PLACEHOLDER_MARKERS = (
@@ -317,12 +336,12 @@ def check_local_migration_files(
         add_result(
             results,
             "fail",
-            "Migration files 001-008",
+            "Migration files 001-012",
             "arquivos ausentes: " + ", ".join(missing),
         )
         return
 
-    add_result(results, "ok", "Migration files 001-008", "arquivos locais presentes")
+    add_result(results, "ok", "Migration files 001-012", "arquivos locais presentes")
 
 
 def parse_body(response: httpx.Response) -> Any:
@@ -388,26 +407,30 @@ def check_remote_migrations(
         response = supabase.get(
             f"/rest/v1/{table}",
             headers=service_headers(config.supabase_service_role_key),
-            params={"select": "id", "limit": "0"},
+            params={"select": "*", "limit": "0"},
         )
         error = check_response_ok(response, label=table)
         if error:
             errors.append(error)
 
-    profile_preferences = supabase.get(
-        "/rest/v1/profiles",
-        headers=service_headers(config.supabase_service_role_key),
-        params={"select": "preferences", "limit": "0"},
-    )
-    error = check_response_ok(profile_preferences, label="profiles.preferences")
-    if error:
-        errors.append(error)
+    for table, columns in REQUIRED_COLUMNS.items():
+        response = supabase.get(
+            f"/rest/v1/{table}",
+            headers=service_headers(config.supabase_service_role_key),
+            params={"select": ",".join(columns), "limit": "0"},
+        )
+        error = check_response_ok(
+            response,
+            label=f"{table}.{'/'.join(columns)}",
+        )
+        if error:
+            errors.append(error)
 
     if errors:
         add_result(
             results,
             "fail",
-            "Migrations remotas 001-008",
+            "Compatibilidade remota 001-012",
             "; ".join(errors),
         )
         return
@@ -415,8 +438,8 @@ def check_remote_migrations(
     add_result(
         results,
         "ok",
-        "Migrations remotas 001-008",
-        "tabelas/colunas esperadas respondem no Supabase",
+        "Compatibilidade remota 001-012",
+        "tabelas/colunas das migrations 001-012 respondem no Supabase",
     )
 
 
@@ -520,7 +543,9 @@ def check_owner_via_service_role(
         if not isinstance(profile_rows, list):
             continue
         profiles_found += len(profile_rows)
-        profiles_with_email += sum(bool(profile.get("email")) for profile in profile_rows)
+        profiles_with_email += sum(
+            bool(profile.get("email")) for profile in profile_rows
+        )
         if any(
             str(profile.get("email", "")).strip().casefold() == normalized_email
             for profile in profile_rows
