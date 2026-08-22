@@ -523,6 +523,11 @@ details form {
   line-height: 1.45;
 }
 
+.payment-live-status {
+  color: var(--green);
+  font-weight: 700;
+}
+
 .pix-copy-box {
   display: grid;
   gap: 8px;

@@ -1,3 +1,5 @@
+import logging
+from datetime import UTC, datetime
 from decimal import Decimal
 
 from app.core.config import settings
@@ -6,9 +8,12 @@ from app.schemas.order import OrderCreate, OrderOut, OrderQuoteOut, OrderStatus
 from app.services.delivery import DeliveryService
 from app.services.loyalty import LoyaltyService
 from app.services.notification import NotificationService
-from app.services.payment import PaymentService
+from app.services.order_lifecycle import OrderLifecycleService
+from app.services.payment import PaymentProviderError, PaymentService
 from app.services.promotion import PromotionService
 from supabase import Client
+
+logger = logging.getLogger("lugano.orders")
 
 
 class OrderService:
@@ -135,16 +140,37 @@ class OrderService:
         order = order_resp.data[0]
         order_id = order["id"]
         customer = self._get_customer(profile_id)
-        payment = self.payments.prepare(
-            order=order,
-            payment_method=payload.payment_method.value,
-            customer=customer,
-        )
-        payment_update = {
-            "payment_provider": payment.provider.value,
-            "payment_reference": payment.reference,
-            "payment_payload": payment.payload,
-        }
+        try:
+            payment = self.payments.prepare(
+                order=order,
+                payment_method=payload.payment_method.value,
+                customer=customer,
+            )
+            payment_status = str(payment.payload.get("status") or "pending")
+            payment_update = {
+                "payment_provider": payment.provider.value,
+                "payment_reference": payment.reference,
+                "payment_status": payment_status,
+                "payment_payload": payment.payload,
+            }
+            if payment_status == "paid":
+                payment_update["paid_at"] = datetime.now(UTC).isoformat()
+        except PaymentProviderError:
+            logger.exception("Payment creation failed order_id=%s", order_id)
+            payment_update = {
+                "payment_provider": "mercado_pago",
+                "payment_reference": None,
+                "payment_status": "failed",
+                "payment_payload": {
+                    "title": "Pix indisponivel",
+                    "description": (
+                        "Nao foi possivel gerar o Pix agora. Tente fazer um novo "
+                        "pedido ou fale com a equipe Lugano."
+                    ),
+                    "method": "pix",
+                    "status": "failed",
+                },
+            }
         (
             self.write_db.table("orders")
             .update(payment_update)
@@ -178,6 +204,9 @@ class OrderService:
         # Fidelidade e entrega sao efeitos posteriores ao pagamento. Eles sao
         # executados pelas transicoes do ciclo do pedido, nunca na criacao.
         await self.notifications.safe_notify_order_status(order)
+
+        if order.get("payment_status") == "paid":
+            await OrderLifecycleService(self.write_db).payment_approved(order_id)
 
         return await self.get_order(order_id=order_id, profile_id=profile_id)
 

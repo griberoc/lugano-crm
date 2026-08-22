@@ -312,7 +312,7 @@ Validacao:
 
 ### P0-005 - Mercado Pago end-to-end
 
-Status: `Ready`
+Status: `Done`
 
 Branch:
 
@@ -334,22 +334,22 @@ Escopo:
 
 Checklist:
 
-- [ ] Configurar access token de teste.
-- [ ] Configurar URL publica de webhook.
-- [ ] Criar pedido real de teste.
-- [ ] Ver QR Code no checkout.
-- [ ] Ver copia-e-cola.
-- [ ] Confirmar webhook recebido.
-- [ ] Confirmar `payment_status` atualizado.
-- [ ] Confirmar admin exibindo pagamento.
-- [ ] Documentar como trocar sandbox/producao.
+- [x] Configurar access token de teste.
+- [x] Configurar URL publica de webhook.
+- [x] Criar pedido real de teste.
+- [x] Ver QR Code no checkout.
+- [x] Ver copia-e-cola.
+- [x] Confirmar webhook recebido.
+- [x] Confirmar `payment_status` atualizado.
+- [x] Confirmar admin exibindo pagamento.
+- [x] Documentar como trocar sandbox/producao.
 
 Criterios de aceite:
 
-- [ ] Cliente consegue pagar Pix dinamico.
-- [ ] Sistema atualiza pagamento automaticamente.
-- [ ] Falha/rejeicao aparece de forma clara.
-- [ ] Nenhum token Mercado Pago fica no frontend.
+- [x] Cliente consegue pagar Pix dinamico.
+- [x] Sistema atualiza pagamento automaticamente.
+- [x] Falha/rejeicao aparece de forma clara.
+- [x] Nenhum token Mercado Pago fica no frontend.
 
 ### P0-006 - Machine Delivery end-to-end
 

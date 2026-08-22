@@ -1,14 +1,22 @@
+import logging
 from typing import Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
 
 from app.core.config import settings
 from app.db.client import get_supabase_admin
+from app.services.audit import AuditService
 from app.services.order_lifecycle import OrderLifecycleService
-from app.services.payment import PaymentService, verify_mercado_pago_signature
+from app.services.payment import (
+    PaymentNotFoundError,
+    PaymentProviderError,
+    PaymentService,
+    verify_mercado_pago_signature,
+)
 from supabase import Client
 
 router = APIRouter(prefix="/payments", tags=["pagamentos"])
+logger = logging.getLogger("lugano.payments")
 
 
 @router.post("/mercado-pago/webhook")
@@ -44,9 +52,48 @@ async def mercado_pago_webhook(
             detail="Assinatura Mercado Pago invalida",
         )
 
-    result = PaymentService().sync_mercado_pago_payment(
-        db=db,
-        payment_id=str(payment_id),
+    try:
+        result = PaymentService().sync_mercado_pago_payment(
+            db=db,
+            payment_id=str(payment_id),
+        )
+    except PaymentNotFoundError:
+        logger.info(
+            "Mercado Pago webhook ignored unknown payment_id=%s",
+            payment_id,
+        )
+        return {
+            "received": True,
+            "ignored": True,
+            "reason": "payment_not_found",
+            "payment_id": str(payment_id),
+        }
+    except PaymentProviderError as exc:
+        logger.exception("Mercado Pago sync failed payment_id=%s", payment_id)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Nao foi possivel confirmar o pagamento agora. Tente novamente.",
+        ) from exc
+
+    logger.info(
+        "Mercado Pago webhook processed payment_id=%s order_id=%s status=%s reason=%s",
+        payment_id,
+        result.get("order_id"),
+        result.get("payment_status"),
+        result.get("reason"),
+    )
+    await AuditService(db).safe_record(
+        actor=None,
+        action="payment.webhook",
+        entity_type="order",
+        entity_id=result.get("order_id"),
+        after_data={"payment_status": result.get("payment_status")},
+        metadata={
+            "provider": "mercado_pago",
+            "payment_id": str(payment_id),
+            "updated": result.get("updated", False),
+            "reason": result.get("reason"),
+        },
     )
     if result.get("payment_status") == "paid" and result.get("order_id"):
         await OrderLifecycleService(db).payment_approved(result["order_id"])

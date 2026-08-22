@@ -43,6 +43,8 @@ const state = {
   quote: null,
   lastOrder: null,
   isSubmitting: false,
+  paymentPollId: null,
+  paymentPollAttempts: 0,
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -394,6 +396,7 @@ function renderLastOrder() {
   $("#last-order-title").textContent = `Pedido #${shortId(order.id)}`;
   $("#last-order-summary").textContent = `${paymentStatusLabels[order.payment_status] || order.payment_status} - Total ${money(order.total)} - Entrega estimada 25-40 min.`;
   renderPaymentInstructions(order.payment_instructions);
+  updatePaymentPolling(order);
 
   const steps = ["pending", "confirmed", "preparing", "out_for_delivery", "delivered"];
   const activeIndex = Math.max(0, steps.indexOf(order.status));
@@ -418,6 +421,7 @@ function renderPaymentInstructions(instructions) {
   const pixCode = instructions?.pix_copy_paste || "";
   const qrBase64 = instructions?.pix_qr_code_base64 || "";
   const ticketUrl = safeHttpUrl(instructions?.payment_url || "");
+  const liveStatus = $("#payment-live-status");
 
   if (!instructions) {
     panel.classList.add("hidden");
@@ -427,6 +431,9 @@ function renderPaymentInstructions(instructions) {
   panel.classList.remove("hidden");
   $("#payment-instructions-title").textContent = instructions.title || "Pagamento";
   $("#payment-instructions-description").textContent = instructions.description || "";
+  liveStatus.textContent = instructions.status === "pending"
+    ? "Aguardando a confirmacao segura do pagamento..."
+    : paymentStatusLabels[instructions.status] || "Status atualizado";
   pixBox.classList.toggle("hidden", !pixCode);
   $("#pix-copy-paste").value = pixCode;
 
@@ -445,6 +452,40 @@ function renderPaymentInstructions(instructions) {
     paymentUrl.href = ticketUrl;
   } else {
     paymentUrl.removeAttribute("href");
+  }
+}
+
+function stopPaymentPolling() {
+  if (state.paymentPollId) window.clearTimeout(state.paymentPollId);
+  state.paymentPollId = null;
+  state.paymentPollAttempts = 0;
+}
+
+function updatePaymentPolling(order) {
+  if (!order || order.payment_provider !== "mercado_pago" || order.payment_status !== "pending") {
+    stopPaymentPolling();
+    return;
+  }
+  if (state.paymentPollId || state.paymentPollAttempts >= 60) return;
+  state.paymentPollId = window.setTimeout(refreshPendingPayment, 5000);
+}
+
+async function refreshPendingPayment() {
+  state.paymentPollId = null;
+  if (!state.lastOrder || !state.session) return;
+  state.paymentPollAttempts += 1;
+  try {
+    const order = await api(`/api/v1/orders/${encodeURIComponent(state.lastOrder.id)}`);
+    state.lastOrder = order;
+    saveState();
+    renderLastOrder();
+    if (order.payment_status === "paid") {
+      showNotice("Pagamento confirmado. Seu pedido ja esta com a equipe Lugano.", "success");
+    } else if (order.payment_status === "failed") {
+      showNotice("O pagamento nao foi aprovado. Confira os dados ou fale com a equipe Lugano.", "error");
+    }
+  } catch {
+    updatePaymentPolling(state.lastOrder);
   }
 }
 

@@ -6,7 +6,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from enum import StrEnum
 from typing import Any
 
@@ -32,6 +32,10 @@ class PaymentProviderError(RuntimeError):
     pass
 
 
+class PaymentNotFoundError(PaymentProviderError):
+    pass
+
+
 MERCADO_PAGO_STATUS_MAP = {
     "approved": "paid",
     "accredited": "paid",
@@ -40,6 +44,8 @@ MERCADO_PAGO_STATUS_MAP = {
     "refunded": "refunded",
     "rejected": "failed",
 }
+
+FINAL_PAYMENT_STATUSES = {"paid", "refunded"}
 
 
 def emv_field(field_id: str, value: str) -> str:
@@ -331,6 +337,19 @@ class PaymentService:
                 "external_reference": external_reference,
             }
 
+
+        validation_error = self._validate_mercado_pago_payment(
+            order=order,
+            payment=payment,
+        )
+        if validation_error:
+            return {
+                "updated": False,
+                "reason": validation_error,
+                "order_id": order["id"],
+                "payment_id": payment_reference,
+            }
+
         previous_payload = order.get("payment_payload") or {}
         if not isinstance(previous_payload, dict):
             previous_payload = {}
@@ -355,17 +374,43 @@ class PaymentService:
             next_payload["payment_url"] = transaction_data["ticket_url"]
 
         payment_status = map_mercado_pago_status(payment.get("status"))
+        previous_status = str(order.get("payment_status") or "pending")
+        if (
+            previous_status in FINAL_PAYMENT_STATUSES
+            and payment_status != previous_status
+        ):
+            return {
+                "updated": False,
+                "reason": "stale_payment_status",
+                "order_id": order["id"],
+                "payment_id": payment_reference,
+                "payment_status": previous_status,
+            }
+
+        changed = payment_status != previous_status or next_payload != previous_payload
+        if not changed:
+            return {
+                "updated": False,
+                "changed": False,
+                "reason": "duplicate_event",
+                "order_id": order["id"],
+                "payment_id": payment_reference,
+                "payment_status": previous_status,
+            }
         updates = {
             "payment_status": payment_status,
             "payment_reference": payment_reference,
             "payment_payload": next_payload,
         }
         if payment_status == "paid":
-            updates["paid_at"] = payment.get("date_approved") or datetime.now(UTC).isoformat()
+            updates["paid_at"] = payment.get("date_approved") or datetime.now(
+                UTC
+            ).isoformat()
 
         db.table("orders").update(updates).eq("id", order["id"]).execute()
         return {
             "updated": True,
+            "changed": changed,
             "order_id": order["id"],
             "payment_id": payment_reference,
             "payment_status": payment_status,
@@ -381,8 +426,9 @@ class PaymentService:
         if external_reference:
             response = (
                 db.table("orders")
-                .select("id,payment_payload")
+                .select("id,total,payment_provider,payment_status,payment_payload")
                 .eq("id", external_reference)
+                .eq("payment_provider", PaymentProvider.MERCADO_PAGO.value)
                 .limit(1)
                 .execute()
             )
@@ -391,13 +437,36 @@ class PaymentService:
 
         response = (
             db.table("orders")
-            .select("id,payment_payload")
+            .select("id,total,payment_provider,payment_status,payment_payload")
             .eq("payment_provider", PaymentProvider.MERCADO_PAGO.value)
             .eq("payment_reference", payment_reference)
             .limit(1)
             .execute()
         )
         return response.data[0] if response.data else None
+
+    def _validate_mercado_pago_payment(
+        self,
+        *,
+        order: dict[str, Any],
+        payment: dict[str, Any],
+    ) -> str | None:
+        if payment.get("currency_id") not in (None, "BRL"):
+            return "currency_mismatch"
+
+        transaction_amount = payment.get("transaction_amount")
+        if transaction_amount is None:
+            return "missing_transaction_amount"
+        try:
+            expected = Decimal(str(order.get("total") or "0")).quantize(
+                Decimal("0.01")
+            )
+            received = Decimal(str(transaction_amount)).quantize(Decimal("0.01"))
+        except InvalidOperation:
+            return "invalid_transaction_amount"
+        if received != expected:
+            return "amount_mismatch"
+        return None
 
     def _request_mercado_pago(
         self,
@@ -437,6 +506,8 @@ class PaymentService:
             )
             if detail:
                 message = f"{message}: {detail}"
+            if response.status_code == 404:
+                raise PaymentNotFoundError(message)
             raise PaymentProviderError(message)
         if not response.content:
             return {}
@@ -452,7 +523,12 @@ class PaymentService:
             data = response.text
 
         if isinstance(data, dict):
-            detail = data.get("message") or data.get("error") or data.get("cause") or data
+            detail = (
+                data.get("message")
+                or data.get("error")
+                or data.get("cause")
+                or data
+            )
         else:
             detail = data
 

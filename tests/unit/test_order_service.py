@@ -8,6 +8,7 @@ from app.core.exceptions import NotFoundError, UnprocessableError
 from app.schemas.loyalty import PromotionValidateResponse
 from app.schemas.order import OrderCreate, OrderItemCreate, PaymentMethod
 from app.services.order import OrderService
+from app.services.payment import PaymentProviderError, PaymentService
 
 
 def make_order(**overrides):
@@ -262,3 +263,51 @@ async def test_create_order_keeps_loyalty_and_delivery_pending_payment(fake_db):
     assert fake_db.tables["loyalty_accounts"][0]["available_points"] == 0
     assert fake_db.tables["loyalty_transactions"] == []
     assert fake_db.tables["notification_events"][0]["event_type"] == "order_created"
+
+
+@pytest.mark.asyncio
+async def test_create_order_returns_safe_failed_payment_when_provider_fails(
+    fake_db,
+    monkeypatch,
+):
+    profile_id = "11111111-1111-1111-1111-111111111111"
+    address_id = "22222222-2222-2222-2222-222222222222"
+    product_id = "33333333-3333-3333-3333-333333333333"
+    fake_db.defaults["orders"] = {
+        "placed_at": fake_db.now,
+        "delivered_at": None,
+    }
+    fake_db.tables["profiles"].append(
+        {"id": profile_id, "email": "cliente@lugano.test"}
+    )
+    fake_db.tables["addresses"].append(
+        {"id": address_id, "profile_id": profile_id}
+    )
+    fake_db.tables["products"].append(
+        {
+            "id": product_id,
+            "name": "Chocolate Lugano",
+            "price": "19.90",
+            "available": True,
+        }
+    )
+    monkeypatch.setattr(
+        PaymentService,
+        "prepare",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            PaymentProviderError("sensitive provider detail")
+        ),
+    )
+
+    order = await OrderService(fake_db, write_db=fake_db).create_order(
+        profile_id=profile_id,
+        payload=OrderCreate(
+            address_id=address_id,
+            payment_method=PaymentMethod.PIX,
+            items=[OrderItemCreate(product_id=product_id, quantity=1)],
+        ),
+    )
+
+    assert order.payment_status == "failed"
+    assert order.payment_instructions.title == "Pix indisponivel"
+    assert "sensitive provider detail" not in order.payment_instructions.description

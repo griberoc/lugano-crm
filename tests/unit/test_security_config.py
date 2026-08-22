@@ -142,6 +142,33 @@ def test_production_accepts_mercado_pago_config():
         mercado_pago_notification_url=(
             "https://api.lugano.test/api/v1/payments/mercado-pago/webhook"
         ),
+        mercado_pago_webhook_secret="test-webhook-secret",
     )
 
     assert settings.payment_provider == "mercado_pago"
+
+
+def test_deployed_mercado_pago_requires_webhook_secret():
+    with pytest.raises(ValidationError):
+        make_settings(
+            payment_provider="mercado_pago",
+            mercado_pago_access_token="test-access-token",
+            mercado_pago_notification_url=(
+                "https://api.lugano.test/api/v1/payments/mercado-pago/webhook"
+            ),
+            mercado_pago_webhook_secret="",
+        )
+
+
+def test_local_mercado_pago_allows_webhook_without_secret():
+    settings = make_settings(
+        app_env="development",
+        payment_provider="mercado_pago",
+        mercado_pago_access_token="test-access-token",
+        mercado_pago_notification_url=(
+            "http://localhost:8000/api/v1/payments/mercado-pago/webhook"
+        ),
+        mercado_pago_webhook_secret="",
+    )
+
+    assert settings.app_env == "development"

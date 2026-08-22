@@ -56,7 +56,9 @@ class Settings(BaseSettings):
     delivery_default_destination_state: str = "MA"
     delivery_machine_category_id: int | None = None
     delivery_machine_category_name: str | None = None
-    delivery_machine_payment_method: Literal["D", "B", "C", "X", "P", "H", "F", "R"] = "F"
+    delivery_machine_payment_method: Literal[
+        "D", "B", "C", "X", "P", "H", "F", "R"
+    ] = "F"
     delivery_machine_cancel_reason_id: int | None = None
 
     # Pagamentos
@@ -250,6 +252,11 @@ class Settings(BaseSettings):
             if not self.mercado_pago_notification_url:
                 raise ValueError(
                     "MERCADO_PAGO_NOTIFICATION_URL deve ser definido quando "
+                    "PAYMENT_PROVIDER=mercado_pago em staging/producao"
+                )
+            if self.is_deployed and not self.mercado_pago_webhook_secret:
+                raise ValueError(
+                    "MERCADO_PAGO_WEBHOOK_SECRET deve ser definido quando "
                     "PAYMENT_PROVIDER=mercado_pago em staging/producao"
                 )
 
