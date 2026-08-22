@@ -1,5 +1,11 @@
 const runtimeConfig = window.LUGANO_CONFIG || {};
 const DEFAULT_API_URL = runtimeConfig.apiBaseUrl || "http://127.0.0.1:8000";
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>'"]/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;",
+  })[character]);
+}
 const DEFAULT_SUPABASE_URL = runtimeConfig.supabaseUrl || "";
 const DEFAULT_SUPABASE_ANON_KEY = runtimeConfig.supabaseAnonKey || "";
 
@@ -168,15 +174,15 @@ function renderAddresses() {
           (address) => `
             <article class="address-card ${address.is_default ? "selected-address" : ""}">
               <div>
-                <strong>${address.label}</strong>
-                <span>${addressLine(address)}</span>
-                <span>CEP ${address.zip_code}</span>
+                <strong>${escapeHTML(address.label)}</strong>
+                <span>${escapeHTML(addressLine(address))}</span>
+                <span>CEP ${escapeHTML(address.zip_code)}</span>
               </div>
               <div class="address-actions">
                 ${address.is_default ? '<span class="mini-badge">Principal</span>' : ""}
-                <button class="ghost-button" data-edit-address="${address.id}" type="button">Editar</button>
-                <button class="ghost-button" data-default-address="${address.id}" type="button">Padrao</button>
-                <button class="ghost-button danger-button" data-delete-address="${address.id}" type="button">Remover</button>
+                <button class="ghost-button" data-edit-address="${escapeHTML(address.id)}" type="button">Editar</button>
+                <button class="ghost-button" data-default-address="${escapeHTML(address.id)}" type="button">Padrao</button>
+                <button class="ghost-button danger-button" data-delete-address="${escapeHTML(address.id)}" type="button">Remover</button>
               </div>
             </article>
           `,
@@ -233,8 +239,8 @@ function renderLoyalty() {
         .map(
           ([key, value]) => `
             <article>
-              <strong>${key}</strong>
-              <span>${value}</span>
+              <strong>${escapeHTML(key)}</strong>
+              <span>${escapeHTML(value)}</span>
             </article>
           `,
         )
@@ -262,10 +268,10 @@ function renderOrders() {
           (order) => `
             <article class="order-card">
               <div>
-                <strong>#${String(order.id).slice(0, 8)}</strong>
+                <strong>#${escapeHTML(String(order.id).slice(0, 8))}</strong>
                 <span>${dateLabel(order.placed_at)} - ${money(order.total)}</span>
               </div>
-              <span class="status ${order.status}">${statusLabel(order.status)}</span>
+              <span class="status ${escapeHTML(order.status)}">${escapeHTML(statusLabel(order.status))}</span>
             </article>
           `,
         )
@@ -287,11 +293,11 @@ function renderPromotions() {
           (promotion) => `
             <article class="promotion-card">
               <div>
-                <strong>${promotion.code}</strong>
-                <span>${promotion.description || promotion.audience}</span>
+                <strong>${escapeHTML(promotion.code)}</strong>
+                <span>${escapeHTML(promotion.description || promotion.audience)}</span>
               </div>
               <div class="promotion-meta">
-                <span>${promotionValue(promotion)}</span>
+                <span>${escapeHTML(promotionValue(promotion))}</span>
                 <span>Pedido minimo ${money((promotion.min_order_cents || 0) / 100)}</span>
                 ${promotion.expires_at ? `<span>Valido ate ${dateLabel(promotion.expires_at)}</span>` : ""}
               </div>
@@ -320,8 +326,8 @@ function renderTransactions() {
           (transaction) => `
             <article class="transaction-card">
               <div>
-                <strong>${transactionLabel(transaction.type)}</strong>
-                <span>${transaction.description}</span>
+                <strong>${escapeHTML(transactionLabel(transaction.type))}</strong>
+                <span>${escapeHTML(transaction.description)}</span>
               </div>
               <div>
                 <strong>${transaction.points} pts</strong>

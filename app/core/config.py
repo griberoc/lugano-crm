@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import model_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -32,6 +32,32 @@ class Settings(BaseSettings):
     # Delivery
     delivery_base_fee: int = 500         # centavos
     delivery_free_threshold: int = 5000  # centavos
+    delivery_provider: Literal["manual", "external_api", "machine"] = "manual"
+    delivery_auto_dispatch_enabled: bool = False
+    delivery_api_base_url: str | None = None
+    delivery_api_key: str | None = None
+    delivery_api_username: str | None = None
+    delivery_api_password: str | None = None
+    delivery_api_auth_header: Literal["Authorization", "X-API-Key"] = "Authorization"
+    delivery_api_quote_path: str = "/entregas/estimativas"
+    delivery_api_dispatch_path: str = "/entregas"
+    delivery_api_cancel_path: str = "/entregas/{external_delivery_id}/cancelar"
+    delivery_api_status_path: str = "/entregas/{external_delivery_id}/status"
+    delivery_api_tracking_path: str = "/entregas/{external_delivery_id}/links-rastreio"
+    delivery_api_timeout_seconds: float = 10.0
+    delivery_origin_address: str | None = None
+    delivery_origin_neighborhood: str | None = None
+    delivery_origin_city: str = "Sao Luis"
+    delivery_origin_state: str = "MA"
+    delivery_origin_complement: str | None = None
+    delivery_origin_reference: str | None = None
+    delivery_origin_lat: float | None = None
+    delivery_origin_lng: float | None = None
+    delivery_default_destination_state: str = "MA"
+    delivery_machine_category_id: int | None = None
+    delivery_machine_category_name: str | None = None
+    delivery_machine_payment_method: Literal["D", "B", "C", "X", "P", "H", "F", "R"] = "F"
+    delivery_machine_cancel_reason_id: int | None = None
 
     # Pagamentos
     payment_provider: Literal["manual", "pix_static", "mercado_pago"] = "manual"
@@ -40,6 +66,7 @@ class Settings(BaseSettings):
     pix_merchant_city: str = "Gramado"
     pix_txid_prefix: str = "LUG"
     pix_expires_minutes: int = 30
+    mercado_pago_base_url: str = "https://api.mercadopago.com"
     mercado_pago_access_token: str | None = None
     mercado_pago_notification_url: str | None = None
     mercado_pago_webhook_secret: str | None = None
@@ -108,6 +135,31 @@ class Settings(BaseSettings):
     def is_deployed(self) -> bool:
         return self.app_env in {"staging", "production"}
 
+    @field_validator(
+        "rate_limit_requests",
+        "rate_limit_window_seconds",
+        "delivery_base_fee",
+        "delivery_free_threshold",
+        "delivery_api_timeout_seconds",
+        "delivery_origin_lat",
+        "delivery_origin_lng",
+        "delivery_machine_category_id",
+        "delivery_machine_cancel_reason_id",
+        "pix_expires_minutes",
+        "mercado_pago_timeout_seconds",
+        "points_per_real",
+        "notification_webhook_timeout_seconds",
+        "monitoring_webhook_timeout_seconds",
+        mode="before",
+    )
+    @classmethod
+    def normalize_numeric_env_value(cls, value):
+        if isinstance(value, str):
+            value = value.split("#", 1)[0].strip()
+        if value == "":
+            return None
+        return value
+
     @model_validator(mode="after")
     def validate_security_settings(self):
         if self.supabase_anon_key == self.supabase_service_role_key:
@@ -154,6 +206,52 @@ class Settings(BaseSettings):
 
         if not self.supabase_url.startswith("https://"):
             raise ValueError("SUPABASE_URL deve usar HTTPS em staging/producao")
+
+        if self.delivery_provider in {"external_api", "machine"} and (
+            not self.delivery_api_base_url or not self.delivery_api_key
+        ):
+            raise ValueError(
+                "DELIVERY_API_BASE_URL e DELIVERY_API_KEY devem ser definidos "
+                "quando DELIVERY_PROVIDER usa API externa"
+            )
+
+        if self.delivery_provider == "machine":
+            missing_machine_settings = [
+                key
+                for key, value in {
+                    "DELIVERY_API_USERNAME": self.delivery_api_username,
+                    "DELIVERY_API_PASSWORD": self.delivery_api_password,
+                    "DELIVERY_ORIGIN_ADDRESS": self.delivery_origin_address,
+                    "DELIVERY_ORIGIN_NEIGHBORHOOD": self.delivery_origin_neighborhood,
+                    "DELIVERY_ORIGIN_CITY": self.delivery_origin_city,
+                    "DELIVERY_ORIGIN_STATE": self.delivery_origin_state,
+                }.items()
+                if not value
+            ]
+            if missing_machine_settings:
+                missing = ", ".join(missing_machine_settings)
+                raise ValueError(
+                    f"Configuracao Machine incompleta: {missing}"
+                )
+
+        if self.delivery_origin_state:
+            self.delivery_origin_state = self.delivery_origin_state.upper()
+        if self.delivery_default_destination_state:
+            self.delivery_default_destination_state = (
+                self.delivery_default_destination_state.upper()
+            )
+
+        if self.payment_provider == "mercado_pago":
+            if not self.mercado_pago_access_token:
+                raise ValueError(
+                    "MERCADO_PAGO_ACCESS_TOKEN deve ser definido quando "
+                    "PAYMENT_PROVIDER=mercado_pago"
+                )
+            if not self.mercado_pago_notification_url:
+                raise ValueError(
+                    "MERCADO_PAGO_NOTIFICATION_URL deve ser definido quando "
+                    "PAYMENT_PROVIDER=mercado_pago em staging/producao"
+                )
 
         return self
 

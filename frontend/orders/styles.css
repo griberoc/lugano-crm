@@ -528,6 +528,29 @@ details form {
   gap: 8px;
 }
 
+.mp-payment-box {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffaf2;
+  padding: 12px;
+}
+
+.mp-payment-box img {
+  width: min(220px, 100%);
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+
+.mp-payment-box .ghost-button {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .pix-copy-box span {
   color: var(--wine);
   font-size: 13px;
@@ -543,7 +566,10 @@ details form {
 }
 
 .payment-instructions.hidden,
-.pix-copy-box.hidden {
+.pix-copy-box.hidden,
+.mp-payment-box.hidden,
+.mp-payment-box img.hidden,
+.mp-payment-box .ghost-button.hidden {
   display: none;
 }
 

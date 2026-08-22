@@ -3,6 +3,17 @@
 !.env.example
 !.env.staging.example
 !.env.production.example
+*.env
+*.env.*
+*.bak
+*.backup
+*.orig
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+secrets*.json
 .venv/
 __pycache__/
 *.py[cod]

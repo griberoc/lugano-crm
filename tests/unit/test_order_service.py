@@ -170,6 +170,8 @@ async def test_create_order_persists_order_items_and_loyalty_points(fake_db):
     previous_whatsapp_enabled = settings.notification_whatsapp_enabled
     previous_payment_provider = settings.payment_provider
     previous_pix_key = settings.pix_key
+    previous_delivery_auto_dispatch = settings.delivery_auto_dispatch_enabled
+    previous_delivery_provider = settings.delivery_provider
     settings.notifications_enabled = True
     settings.notification_email_enabled = True
     settings.notification_whatsapp_enabled = True
@@ -177,6 +179,8 @@ async def test_create_order_persists_order_items_and_loyalty_points(fake_db):
     settings.notification_whatsapp_webhook_url = None
     settings.payment_provider = "pix_static"
     settings.pix_key = "financeiro@lugano.com.br"
+    settings.delivery_auto_dispatch_enabled = True
+    settings.delivery_provider = "manual"
     profile_id = "11111111-1111-1111-1111-111111111111"
     address_id = "22222222-2222-2222-2222-222222222222"
     product_id = "33333333-3333-3333-3333-333333333333"
@@ -246,12 +250,19 @@ async def test_create_order_persists_order_items_and_loyalty_points(fake_db):
         settings.notification_whatsapp_enabled = previous_whatsapp_enabled
         settings.payment_provider = previous_payment_provider
         settings.pix_key = previous_pix_key
+        settings.delivery_auto_dispatch_enabled = previous_delivery_auto_dispatch
+        settings.delivery_provider = previous_delivery_provider
 
     assert order.total == Decimal("24.9")
     assert order.payment_provider == "pix_static"
     assert order.payment_instructions.pix_copy_paste
     assert fake_db.tables["order_items"][0]["product_id"] == product_id
     assert fake_db.tables["orders"][0]["payment_provider"] == "pix_static"
+    assert (
+        fake_db.tables["delivery_dispatches"][0]["order_id"]
+        == fake_db.tables["orders"][0]["id"]
+    )
+    assert fake_db.tables["delivery_dispatches"][0]["status"] == "manual_pending"
     assert fake_db.tables["loyalty_accounts"][0]["available_points"] == 240
     assert fake_db.tables["loyalty_transactions"][0]["points"] == 240
     assert fake_db.tables["notification_events"][0]["event_type"] == "order_created"

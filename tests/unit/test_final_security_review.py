@@ -54,6 +54,45 @@ def test_check_allowed_origins_fails_on_localhost():
     assert results[0].status == "fail"
 
 
+def test_admin_login_failure_does_not_expose_response_body():
+    def api_handler(request):
+        if request.url.path == "/api/v1/admin/login":
+            return httpx.Response(503, text="sensitive upstream response")
+        return httpx.Response(404)
+
+    def supabase_handler(request):
+        path = request.url.path
+        params = dict(request.url.params)
+        if path == "/rest/v1/admin_users" and params.get("role") == "eq.owner":
+            return httpx.Response(
+                200,
+                json=[{"profile_id": "owner-id", "role": "owner", "active": True}],
+            )
+        if path == "/rest/v1/profiles" and params.get("id") == "eq.owner-id":
+            return httpx.Response(
+                200,
+                json=[{"id": "owner-id", "email": "owner@lugano.com.br"}],
+            )
+        if (
+            path in {"/rest/v1/orders", "/rest/v1/audit_logs"}
+            and request.headers.get("apikey") == "anon-real-key"
+        ):
+            return httpx.Response(403)
+        if path.startswith("/rest/v1/"):
+            return httpx.Response(200, json=[])
+        return httpx.Response(404)
+
+    with (
+        mock_client("https://api.lugano.com.br", api_handler) as api,
+        mock_client("https://lugano.supabase.co", supabase_handler) as supabase,
+    ):
+        results = run_review_with_clients(review_config(), api=api, supabase=supabase)
+
+    login_result = next(result for result in results if result.name == "Owner admin login")
+    assert login_result.detail == "login admin retornou HTTP 503"
+    assert "sensitive" not in login_result.detail
+
+
 def test_run_review_passes_expected_remote_checks():
     def api_handler(request):
         if request.url.path == "/api/v1/admin/login":
@@ -66,12 +105,17 @@ def test_run_review_passes_expected_remote_checks():
     def supabase_handler(request):
         path = request.url.path
         params = dict(request.url.params)
-        if path == "/rest/v1/profiles" and params.get("email"):
+        if path == "/auth/v1/admin/users":
+            return httpx.Response(
+                200,
+                json={"users": [{"id": "owner-id", "email": "owner@lugano.com.br"}]},
+            )
+        if path == "/rest/v1/profiles" and params.get("id") == "eq.owner-id":
             return httpx.Response(
                 200,
                 json=[{"id": "owner-id", "email": "owner@lugano.com.br"}],
             )
-        if path == "/rest/v1/admin_users" and params.get("profile_id"):
+        if path == "/rest/v1/admin_users" and params.get("role") == "eq.owner":
             return httpx.Response(
                 200,
                 json=[
@@ -113,7 +157,12 @@ def test_run_review_fails_when_anon_can_read_orders():
     def supabase_handler(request):
         path = request.url.path
         params = dict(request.url.params)
-        if path == "/rest/v1/profiles" and params.get("email"):
+        if path == "/auth/v1/admin/users":
+            return httpx.Response(
+                200,
+                json={"users": [{"id": "owner-id", "email": "owner@lugano.com.br"}]},
+            )
+        if path == "/rest/v1/profiles" and params.get("id") == "eq.owner-id":
             return httpx.Response(200, json=[{"id": "owner-id"}])
         if path == "/rest/v1/admin_users" and params.get("profile_id"):
             return httpx.Response(200, json=[{"role": "owner", "active": True}])
@@ -128,6 +177,85 @@ def test_run_review_fails_when_anon_can_read_orders():
 
     assert has_failures(results)
     assert any(result.name == "RLS basico" for result in results)
+
+
+def test_owner_lookup_uses_active_owner_profile_id():
+    def api_handler(request):
+        if request.url.path == "/api/v1/admin/login":
+            return httpx.Response(200, json={"admin": {"role": "owner"}})
+        return httpx.Response(404)
+
+    def supabase_handler(request):
+        path = request.url.path
+        params = dict(request.url.params)
+        if path == "/rest/v1/profiles" and params.get("id") == "eq.canonical-id":
+            return httpx.Response(
+                200,
+                json=[{"id": "canonical-id", "email": "OWNER@LUGANO.COM.BR"}],
+            )
+        if path == "/rest/v1/admin_users" and params.get("role") == "eq.owner":
+            return httpx.Response(
+                200,
+                json=[{"profile_id": "canonical-id", "role": "owner", "active": True}],
+            )
+        if (
+            path in {"/rest/v1/orders", "/rest/v1/audit_logs"}
+            and request.headers.get("apikey") == "anon-real-key"
+        ):
+            return httpx.Response(403)
+        if path.startswith("/rest/v1/"):
+            return httpx.Response(200, json=[])
+        return httpx.Response(404)
+
+    with (
+        mock_client("https://api.lugano.com.br", api_handler) as api,
+        mock_client("https://lugano.supabase.co", supabase_handler) as supabase,
+    ):
+        results = run_review_with_clients(review_config(), api=api, supabase=supabase)
+
+    assert not has_failures(results)
+
+
+def test_owner_lookup_checks_all_active_owner_profiles():
+    def api_handler(request):
+        if request.url.path == "/api/v1/admin/login":
+            return httpx.Response(200, json={"admin": {"role": "owner"}})
+        return httpx.Response(404)
+
+    def supabase_handler(request):
+        path = request.url.path
+        params = dict(request.url.params)
+        if path == "/rest/v1/profiles" and params.get("id") == "eq.other-id":
+            return httpx.Response(200, json=[{"id": "other-id", "email": "other@test"}])
+        if path == "/rest/v1/profiles" and params.get("id") == "eq.owner-id":
+            return httpx.Response(
+                200,
+                json=[{"id": "owner-id", "email": "owner@lugano.com.br"}],
+            )
+        if path == "/rest/v1/admin_users" and params.get("role") == "eq.owner":
+            return httpx.Response(
+                200,
+                json=[
+                    {"profile_id": "other-id", "role": "owner", "active": True},
+                    {"profile_id": "owner-id", "role": "owner", "active": True},
+                ],
+            )
+        if (
+            path in {"/rest/v1/orders", "/rest/v1/audit_logs"}
+            and request.headers.get("apikey") == "anon-real-key"
+        ):
+            return httpx.Response(403)
+        if path.startswith("/rest/v1/"):
+            return httpx.Response(200, json=[])
+        return httpx.Response(404)
+
+    with (
+        mock_client("https://api.lugano.com.br", api_handler) as api,
+        mock_client("https://lugano.supabase.co", supabase_handler) as supabase,
+    ):
+        results = run_review_with_clients(review_config(), api=api, supabase=supabase)
+
+    assert not has_failures(results)
 
 
 def test_build_config_reads_owner_fallback_env(monkeypatch, tmp_path):

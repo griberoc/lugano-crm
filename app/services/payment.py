@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import hmac
 import re
 import unicodedata
 from dataclasses import dataclass
@@ -7,6 +9,8 @@ from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from enum import StrEnum
 from typing import Any
+
+import httpx
 
 from app.core.config import settings
 
@@ -22,6 +26,20 @@ class PaymentPreparation:
     provider: PaymentProvider
     reference: str | None
     payload: dict[str, Any]
+
+
+class PaymentProviderError(RuntimeError):
+    pass
+
+
+MERCADO_PAGO_STATUS_MAP = {
+    "approved": "paid",
+    "accredited": "paid",
+    "cancelled": "failed",
+    "charged_back": "refunded",
+    "refunded": "refunded",
+    "rejected": "failed",
+}
 
 
 def emv_field(field_id: str, value: str) -> str:
@@ -90,8 +108,57 @@ def build_pix_copy_paste(
     return f"{payload_without_crc}{crc16_ccitt(payload_without_crc)}"
 
 
+def map_mercado_pago_status(status: str | None) -> str:
+    return MERCADO_PAGO_STATUS_MAP.get(str(status or "").lower(), "pending")
+
+
+def verify_mercado_pago_signature(
+    *,
+    x_signature: str | None,
+    x_request_id: str | None,
+    data_id: str | None,
+    secret: str | None,
+) -> bool:
+    if not secret:
+        return True
+    if not x_signature or not x_request_id:
+        return False
+
+    signature_parts = {}
+    for part in x_signature.split(","):
+        key, _, value = part.partition("=")
+        if key and value:
+            signature_parts[key.strip()] = value.strip()
+
+    timestamp = signature_parts.get("ts")
+    received_hash = signature_parts.get("v1")
+    if not timestamp or not received_hash:
+        return False
+
+    manifest_parts = []
+    if data_id:
+        manifest_parts.append(f"id:{str(data_id).lower()}")
+    manifest_parts.append(f"request-id:{x_request_id}")
+    manifest_parts.append(f"ts:{timestamp}")
+    manifest = ";".join(manifest_parts) + ";"
+    expected_hash = hmac.new(
+        secret.encode("utf-8"),
+        manifest.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+    return hmac.compare_digest(expected_hash, received_hash)
+
+
 class PaymentService:
-    def prepare(self, order: dict[str, Any], payment_method: str) -> PaymentPreparation:
+    def prepare(
+        self,
+        order: dict[str, Any],
+        payment_method: str,
+        customer: dict[str, Any] | None = None,
+    ) -> PaymentPreparation:
+        if payment_method == "pix" and settings.payment_provider == "mercado_pago":
+            return self._prepare_mercado_pago_pix(order, customer=customer)
+
         if payment_method == "pix" and settings.payment_provider == "pix_static":
             return self._prepare_pix_static(order)
 
@@ -172,3 +239,227 @@ class PaymentService:
                 "expires_at": expires_at.isoformat(),
             },
         )
+
+    def _prepare_mercado_pago_pix(
+        self,
+        order: dict[str, Any],
+        *,
+        customer: dict[str, Any] | None,
+    ) -> PaymentPreparation:
+        if not settings.mercado_pago_access_token:
+            return self._prepare_manual_pix(order)
+
+        payer_email = (customer or {}).get("email") or order.get("customer_email")
+        if not payer_email:
+            raise PaymentProviderError(
+                "Email do cliente e obrigatorio para criar Pix Mercado Pago"
+            )
+
+        order_id = str(order.get("id") or "")
+        total = Decimal(str(order.get("total") or "0")).quantize(Decimal("0.01"))
+        request_payload = {
+            "transaction_amount": float(total),
+            "description": f"Pedido Lugano {order_id[:8]}",
+            "payment_method_id": "pix",
+            "external_reference": order_id,
+            "payer": {"email": payer_email},
+        }
+        if settings.mercado_pago_notification_url:
+            request_payload["notification_url"] = settings.mercado_pago_notification_url
+
+        response = self._request_mercado_pago(
+            "POST",
+            "/v1/payments",
+            json=request_payload,
+            idempotency_key=f"lugano-order-{order_id}",
+        )
+        payment_id = str(response.get("id") or "")
+        transaction_data = (
+            response.get("point_of_interaction", {})
+            .get("transaction_data", {})
+        )
+        pix_copy_paste = transaction_data.get("qr_code")
+        pix_qr_code_base64 = transaction_data.get("qr_code_base64")
+        ticket_url = transaction_data.get("ticket_url")
+        mapped_status = map_mercado_pago_status(response.get("status"))
+
+        return PaymentPreparation(
+            provider=PaymentProvider.MERCADO_PAGO,
+            reference=payment_id or order_id,
+            payload={
+                "title": "Pix Mercado Pago",
+                "description": (
+                    "Pague pelo Pix gerado pelo Mercado Pago. A confirmacao "
+                    "sera atualizada automaticamente apos o pagamento."
+                ),
+                "method": "pix",
+                "status": mapped_status,
+                "amount": f"{total:.2f}",
+                "mercado_pago_payment_id": payment_id or None,
+                "external_reference": order_id,
+                "status_detail": response.get("status_detail"),
+                "pix_copy_paste": pix_copy_paste,
+                "pix_qr_code_base64": pix_qr_code_base64,
+                "payment_url": ticket_url,
+                "raw_status": response.get("status"),
+            },
+        )
+
+    def get_mercado_pago_payment(self, payment_id: str) -> dict[str, Any]:
+        return self._request_mercado_pago("GET", f"/v1/payments/{payment_id}")
+
+    def sync_mercado_pago_payment(
+        self,
+        *,
+        db,
+        payment_id: str,
+    ) -> dict[str, Any]:
+        payment = self.get_mercado_pago_payment(payment_id)
+        external_reference = str(payment.get("external_reference") or "")
+        payment_reference = str(payment.get("id") or payment_id)
+
+        order = self._find_order_for_payment(
+            db=db,
+            external_reference=external_reference,
+            payment_reference=payment_reference,
+        )
+        if not order:
+            return {
+                "updated": False,
+                "reason": "order_not_found",
+                "payment_id": payment_reference,
+                "external_reference": external_reference,
+            }
+
+        previous_payload = order.get("payment_payload") or {}
+        if not isinstance(previous_payload, dict):
+            previous_payload = {}
+
+        transaction_data = (
+            payment.get("point_of_interaction", {})
+            .get("transaction_data", {})
+        )
+        next_payload = {
+            **previous_payload,
+            "status": map_mercado_pago_status(payment.get("status")),
+            "raw_status": payment.get("status"),
+            "status_detail": payment.get("status_detail"),
+            "mercado_pago_payment_id": payment_reference,
+            "external_reference": external_reference or order.get("id"),
+        }
+        if transaction_data.get("qr_code"):
+            next_payload["pix_copy_paste"] = transaction_data["qr_code"]
+        if transaction_data.get("qr_code_base64"):
+            next_payload["pix_qr_code_base64"] = transaction_data["qr_code_base64"]
+        if transaction_data.get("ticket_url"):
+            next_payload["payment_url"] = transaction_data["ticket_url"]
+
+        payment_status = map_mercado_pago_status(payment.get("status"))
+        updates = {
+            "payment_status": payment_status,
+            "payment_reference": payment_reference,
+            "payment_payload": next_payload,
+        }
+        if payment_status == "paid":
+            updates["paid_at"] = payment.get("date_approved") or datetime.now(UTC).isoformat()
+
+        db.table("orders").update(updates).eq("id", order["id"]).execute()
+        return {
+            "updated": True,
+            "order_id": order["id"],
+            "payment_id": payment_reference,
+            "payment_status": payment_status,
+        }
+
+    def _find_order_for_payment(
+        self,
+        *,
+        db,
+        external_reference: str,
+        payment_reference: str,
+    ) -> dict[str, Any] | None:
+        if external_reference:
+            response = (
+                db.table("orders")
+                .select("id,payment_payload")
+                .eq("id", external_reference)
+                .limit(1)
+                .execute()
+            )
+            if response.data:
+                return response.data[0]
+
+        response = (
+            db.table("orders")
+            .select("id,payment_payload")
+            .eq("payment_provider", PaymentProvider.MERCADO_PAGO.value)
+            .eq("payment_reference", payment_reference)
+            .limit(1)
+            .execute()
+        )
+        return response.data[0] if response.data else None
+
+    def _request_mercado_pago(
+        self,
+        method: str,
+        path: str,
+        *,
+        json: dict[str, Any] | None = None,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        if not settings.mercado_pago_access_token:
+            raise PaymentProviderError("MERCADO_PAGO_ACCESS_TOKEN nao configurado")
+
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {settings.mercado_pago_access_token}",
+        }
+        if idempotency_key:
+            headers["X-Idempotency-Key"] = idempotency_key
+
+        url = f"{settings.mercado_pago_base_url.rstrip('/')}/{path.lstrip('/')}"
+        try:
+            with httpx.Client(timeout=settings.mercado_pago_timeout_seconds) as client:
+                response = client.request(method, url, json=json, headers=headers)
+            return self._decode_mercado_pago_response(response)
+        except PaymentProviderError:
+            raise
+        except Exception as exc:
+            raise PaymentProviderError(str(exc)) from exc
+
+    def _decode_mercado_pago_response(self, response: httpx.Response) -> dict[str, Any]:
+        if response.is_error:
+            detail = self._mercado_pago_error_detail(response)
+            message = (
+                f"Mercado Pago retornou {response.status_code} "
+                f"{response.reason_phrase}"
+            )
+            if detail:
+                message = f"{message}: {detail}"
+            raise PaymentProviderError(message)
+        if not response.content:
+            return {}
+        data = response.json()
+        if not isinstance(data, dict):
+            raise PaymentProviderError("Resposta do Mercado Pago nao e JSON")
+        return data
+
+    def _mercado_pago_error_detail(self, response: httpx.Response) -> str:
+        try:
+            data = response.json()
+        except ValueError:
+            data = response.text
+
+        if isinstance(data, dict):
+            detail = data.get("message") or data.get("error") or data.get("cause") or data
+        else:
+            detail = data
+
+        text = str(detail).strip()
+        if not text:
+            return ""
+        text = " ".join(text.split())
+        if len(text) > 700:
+            text = f"{text[:700]}..."
+        return text

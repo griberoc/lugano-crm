@@ -3,6 +3,7 @@ from decimal import Decimal
 from app.core.config import settings
 from app.core.exceptions import NotFoundError, UnprocessableError
 from app.schemas.order import OrderCreate, OrderOut, OrderQuoteOut, OrderStatus
+from app.services.delivery import DeliveryService
 from app.services.loyalty import LoyaltyService
 from app.services.notification import NotificationService
 from app.services.payment import PaymentService
@@ -18,12 +19,26 @@ class OrderService:
         self.notifications = NotificationService(self.write_db)
         self.promotion = PromotionService(db, write_db=self.write_db)
         self.payments = PaymentService()
+        self.delivery = DeliveryService(self.write_db)
 
     def _to_order_out(self, data: dict) -> OrderOut:
         data = data.copy()
         data["items"] = data.pop("order_items", data.get("items", []))
         data["payment_instructions"] = data.get("payment_payload") or None
         return OrderOut(**data)
+
+    def _get_customer(self, profile_id: str) -> dict | None:
+        try:
+            response = (
+                self.write_db.table("profiles")
+                .select("id, full_name, email, phone")
+                .eq("id", profile_id)
+                .single()
+                .execute()
+            )
+            return response.data or None
+        except Exception:
+            return None
 
     def quote(self, subtotal_cents: int, free_delivery: bool = False) -> OrderQuoteOut:
         delivery_fee = (
@@ -48,7 +63,7 @@ class OrderService:
     async def create_order(self, profile_id: str, payload: OrderCreate) -> OrderOut:
         address_resp = (
             self.db.table("addresses")
-            .select("id")
+            .select("*")
             .eq("id", str(payload.address_id))
             .eq("profile_id", profile_id)
             .single()
@@ -119,9 +134,11 @@ class OrderService:
         order_resp = self.write_db.table("orders").insert(order_data).execute()
         order = order_resp.data[0]
         order_id = order["id"]
+        customer = self._get_customer(profile_id)
         payment = self.payments.prepare(
             order=order,
             payment_method=payload.payment_method.value,
+            customer=customer,
         )
         payment_update = {
             "payment_provider": payment.provider.value,
@@ -164,6 +181,13 @@ class OrderService:
             order_id=order_id,
             order_total=total,
         )
+        if settings.delivery_auto_dispatch_enabled:
+            await self.delivery.safe_dispatch_order(
+                order=order,
+                customer=customer,
+                address=address_resp.data,
+                items=items_data,
+            )
         await self.notifications.safe_notify_order_status(order)
 
         return await self.get_order(order_id=order_id, profile_id=profile_id)
