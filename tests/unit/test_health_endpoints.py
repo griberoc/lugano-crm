@@ -26,6 +26,7 @@ def test_health_liveness_returns_request_id(client):
 
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
+    assert response.json()["payment_provider"] == settings.payment_provider
     assert response.headers["X-Request-ID"]
 
 

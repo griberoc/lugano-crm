@@ -64,6 +64,7 @@ async def health_check():
         "env": settings.app_env,
         "service": settings.monitoring_service_name,
         "version": app.version,
+        "payment_provider": settings.payment_provider,
     }
 
 
