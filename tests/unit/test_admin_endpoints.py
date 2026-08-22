@@ -608,6 +608,28 @@ def test_admin_updates_order_status(client, admin_headers, fake_db):
     assert audit_log["metadata"]["changed_fields"] == ["payment_status", "status"]
 
 
+def test_admin_cannot_prepare_order_before_payment(client, admin_headers, fake_db):
+    order_id = "11111111-1111-1111-1111-111111111111"
+    fake_db.tables["orders"].append(
+        {
+            "id": order_id,
+            "profile_id": "22222222-2222-2222-2222-222222222222",
+            "status": "pending",
+            "payment_status": "pending",
+        }
+    )
+
+    response = client.patch(
+        f"/api/v1/admin/orders/{order_id}",
+        headers=admin_headers,
+        json={"status": "preparing"},
+    )
+
+    assert response.status_code == 422
+    assert "pagamento" in response.json()["detail"].lower()
+    assert fake_db.tables["orders"][0]["status"] == "pending"
+
+
 def test_admin_order_status_change_queues_notification(client, admin_headers, fake_db):
     previous_email_webhook = settings.notification_email_webhook_url
     previous_whatsapp_webhook = settings.notification_whatsapp_webhook_url

@@ -29,6 +29,7 @@ from app.schemas.admin import (
 )
 from app.services.audit import AuditService
 from app.services.notification import NotificationService
+from app.services.order_lifecycle import OrderLifecycleService
 from app.services.reports import ReportService
 from supabase import Client
 
@@ -803,6 +804,21 @@ async def update_order(
     previous_order = deepcopy(current_response.data)
     previous_status = previous_order.get("status")
 
+    next_status = data.get("status", previous_status)
+    next_payment_status = data.get(
+        "payment_status", previous_order.get("payment_status")
+    )
+    paid_required = {
+        "preparing",
+        "out_for_delivery",
+        "delivered",
+    }
+    if next_status in paid_required and next_payment_status != "paid":
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Confirme o pagamento antes de avancar o pedido.",
+        )
+
     response = run_admin_query(
         db.table("orders").update(data).eq("id", order_id),
         "Falha ao atualizar pedido",
@@ -830,4 +846,15 @@ async def update_order(
     )
     if status_changed:
         await NotificationService(db).safe_notify_order_status(updated_order)
+    lifecycle = OrderLifecycleService(db)
+    if (
+        updated_order.get("payment_status") == "paid"
+        and previous_order.get("payment_status") != "paid"
+    ):
+        await lifecycle.payment_approved(order_id)
+        updated_order = lifecycle.get_order(order_id) or updated_order
+    if status_changed and updated_order.get("status") == "out_for_delivery":
+        await lifecycle.dispatch_paid_order(order_id)
+    if status_changed and updated_order.get("status") == "delivered":
+        await lifecycle.order_delivered(order_id)
     return serialize_admin_order(db, updated_order)

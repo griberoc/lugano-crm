@@ -175,19 +175,8 @@ class OrderService:
                 discount_applied=discount / 100,
             )
 
-        # 7. Creditar pontos de fidelidade
-        await self.loyalty.earn_points(
-            profile_id=profile_id,
-            order_id=order_id,
-            order_total=total,
-        )
-        if settings.delivery_auto_dispatch_enabled:
-            await self.delivery.safe_dispatch_order(
-                order=order,
-                customer=customer,
-                address=address_resp.data,
-                items=items_data,
-            )
+        # Fidelidade e entrega sao efeitos posteriores ao pagamento. Eles sao
+        # executados pelas transicoes do ciclo do pedido, nunca na criacao.
         await self.notifications.safe_notify_order_status(order)
 
         return await self.get_order(order_id=order_id, profile_id=profile_id)

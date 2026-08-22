@@ -251,7 +251,7 @@ rg -n "innerHTML" frontend
 
 ### P0-004 - Ciclo correto do pedido
 
-Status: `Ready`
+Status: `Done`
 
 Branch:
 
@@ -288,21 +288,21 @@ Escopo:
 
 Checklist:
 
-- [ ] Criar estados claros para pagamento e pedido.
-- [ ] Remover credito imediato de pontos na criacao do pedido.
-- [ ] Mover credito para evento correto.
-- [ ] Bloquear dispatch Machine antes de pagamento.
-- [ ] Atualizar webhook Mercado Pago para disparar proxima etapa correta.
-- [ ] Atualizar admin para acao manual quando necessario.
-- [ ] Garantir idempotencia para webhook repetido.
+- [x] Criar estados claros para pagamento e pedido.
+- [x] Remover credito imediato de pontos na criacao do pedido.
+- [x] Mover credito para evento correto.
+- [x] Bloquear dispatch Machine antes de pagamento.
+- [x] Atualizar webhook Mercado Pago para disparar proxima etapa correta.
+- [x] Atualizar admin para acao manual quando necessario.
+- [x] Garantir idempotencia para webhook repetido.
 
 Criterios de aceite:
 
-- [ ] Pedido Pix pendente nao gera pontos.
-- [ ] Pedido Pix pendente nao solicita entrega automatica.
-- [ ] Pagamento aprovado atualiza `payment_status=paid`.
-- [ ] Pontos nao duplicam em webhook repetido.
-- [ ] Entrega nao duplica em webhook repetido.
+- [x] Pedido Pix pendente nao gera pontos.
+- [x] Pedido Pix pendente nao solicita entrega automatica.
+- [x] Pagamento aprovado atualiza `payment_status=paid`.
+- [x] Pontos nao duplicam em webhook repetido.
+- [x] Entrega nao duplica em webhook repetido.
 
 Validacao:
 

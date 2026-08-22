@@ -537,6 +537,27 @@ class DeliveryService:
         if not settings.delivery_auto_dispatch_enabled:
             return None
 
+        if order.get("payment_status") != "paid":
+            logger.info(
+                "Delivery dispatch blocked before payment order_id=%s",
+                order.get("id"),
+            )
+            return None
+
+        if self.db:
+            existing = (
+                self.db.table("delivery_dispatches")
+                .select("*")
+                .eq("order_id", order.get("id"))
+                .limit(1)
+                .execute()
+            )
+            if any(
+                row.get("status") not in {"failed", "cancelled"}
+                for row in existing.data
+            ):
+                return None
+
         try:
             dispatch = await self.provider.dispatch(
                 order=order,

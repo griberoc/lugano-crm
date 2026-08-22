@@ -1,11 +1,12 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
-from supabase import Client
 
 from app.core.config import settings
 from app.db.client import get_supabase_admin
+from app.services.order_lifecycle import OrderLifecycleService
 from app.services.payment import PaymentService, verify_mercado_pago_signature
+from supabase import Client
 
 router = APIRouter(prefix="/payments", tags=["pagamentos"])
 
@@ -47,4 +48,6 @@ async def mercado_pago_webhook(
         db=db,
         payment_id=str(payment_id),
     )
+    if result.get("payment_status") == "paid" and result.get("order_id"):
+        await OrderLifecycleService(db).payment_approved(result["order_id"])
     return {"received": True, **result}

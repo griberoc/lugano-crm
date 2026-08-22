@@ -162,7 +162,7 @@ async def test_create_order_rejects_address_from_another_customer(fake_db):
 
 
 @pytest.mark.asyncio
-async def test_create_order_persists_order_items_and_loyalty_points(fake_db):
+async def test_create_order_keeps_loyalty_and_delivery_pending_payment(fake_db):
     previous_email_webhook = settings.notification_email_webhook_url
     previous_whatsapp_webhook = settings.notification_whatsapp_webhook_url
     previous_enabled = settings.notifications_enabled
@@ -258,11 +258,7 @@ async def test_create_order_persists_order_items_and_loyalty_points(fake_db):
     assert order.payment_instructions.pix_copy_paste
     assert fake_db.tables["order_items"][0]["product_id"] == product_id
     assert fake_db.tables["orders"][0]["payment_provider"] == "pix_static"
-    assert (
-        fake_db.tables["delivery_dispatches"][0]["order_id"]
-        == fake_db.tables["orders"][0]["id"]
-    )
-    assert fake_db.tables["delivery_dispatches"][0]["status"] == "manual_pending"
-    assert fake_db.tables["loyalty_accounts"][0]["available_points"] == 240
-    assert fake_db.tables["loyalty_transactions"][0]["points"] == 240
+    assert fake_db.tables["delivery_dispatches"] == []
+    assert fake_db.tables["loyalty_accounts"][0]["available_points"] == 0
+    assert fake_db.tables["loyalty_transactions"] == []
     assert fake_db.tables["notification_events"][0]["event_type"] == "order_created"

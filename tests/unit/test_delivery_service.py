@@ -110,7 +110,10 @@ async def test_manual_dispatch_records_delivery_dispatch(fake_db):
 
     try:
         dispatch = await DeliveryService(fake_db).safe_dispatch_order(
-            order={"id": "11111111-1111-1111-1111-111111111111"},
+            order={
+                "id": "11111111-1111-1111-1111-111111111111",
+                "payment_status": "paid",
+            },
             customer={"id": "22222222-2222-2222-2222-222222222222"},
             address={"id": "33333333-3333-3333-3333-333333333333"},
             items=[{"quantity": 1}],
@@ -122,6 +125,43 @@ async def test_manual_dispatch_records_delivery_dispatch(fake_db):
     assert dispatch.status == "manual_pending"
     assert fake_db.tables["delivery_dispatches"][0]["provider"] == "manual"
     assert fake_db.tables["delivery_dispatches"][0]["status"] == "manual_pending"
+
+
+@pytest.mark.asyncio
+async def test_dispatch_blocks_unpaid_order_and_does_not_duplicate(fake_db):
+    previous_auto_dispatch = settings.delivery_auto_dispatch_enabled
+    previous_provider = settings.delivery_provider
+    settings.delivery_auto_dispatch_enabled = True
+    settings.delivery_provider = "manual"
+    service = DeliveryService(fake_db)
+
+    try:
+        unpaid = await service.safe_dispatch_order(
+            order={"id": "order-1", "payment_status": "pending"},
+            customer=None,
+            address=None,
+            items=[],
+        )
+        first = await service.safe_dispatch_order(
+            order={"id": "order-1", "payment_status": "paid"},
+            customer=None,
+            address=None,
+            items=[],
+        )
+        repeated = await service.safe_dispatch_order(
+            order={"id": "order-1", "payment_status": "paid"},
+            customer=None,
+            address=None,
+            items=[],
+        )
+    finally:
+        settings.delivery_auto_dispatch_enabled = previous_auto_dispatch
+        settings.delivery_provider = previous_provider
+
+    assert unpaid is None
+    assert first is not None
+    assert repeated is None
+    assert len(fake_db.tables["delivery_dispatches"]) == 1
 
 
 def test_machine_headers_use_basic_auth_and_api_key():

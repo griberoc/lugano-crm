@@ -41,6 +41,17 @@ class LoyaltyService:
         if points <= 0:
             return 0
 
+        existing = (
+            self.db.table("loyalty_transactions")
+            .select("id")
+            .eq("order_id", order_id)
+            .eq("type", TransactionType.EARN.value)
+            .limit(1)
+            .execute()
+        )
+        if existing.data:
+            return 0
+
         account = self._get_account(profile_id)
 
         self.write_db.table("loyalty_accounts").update({
