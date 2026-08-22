@@ -40,7 +40,7 @@ services:
       - key: POINTS_PER_REAL
         value: "10"
       - key: PAYMENT_PROVIDER
-        value: pix_static
+        value: mercado_pago
       - key: PIX_KEY
         sync: false
       - key: PIX_MERCHANT_NAME
@@ -51,6 +51,16 @@ services:
         value: LUG
       - key: PIX_EXPIRES_MINUTES
         value: "30"
+      - key: MERCADO_PAGO_BASE_URL
+        value: https://api.mercadopago.com
+      - key: MERCADO_PAGO_ACCESS_TOKEN
+        sync: false
+      - key: MERCADO_PAGO_NOTIFICATION_URL
+        sync: false
+      - key: MERCADO_PAGO_WEBHOOK_SECRET
+        sync: false
+      - key: MERCADO_PAGO_TIMEOUT_SECONDS
+        value: "10"
       - key: NOTIFICATIONS_ENABLED
         value: "false"
       - key: NOTIFICATION_EMAIL_ENABLED
