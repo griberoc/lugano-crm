@@ -567,18 +567,76 @@ function renderProducts() {
           <div class="product-list-content">
             <div class="list-item-header">
               <strong>${escapeHTML(product.name)}</strong>
-              <span>${money(product.price)}</span>
+              <span data-product-price-display>${money(product.price)}</span>
             </div>
             <span class="muted">${escapeHTML(product.category)}</span>
             <span class="status ${product.available ? "active" : ""}">
               ${product.available ? "disponível" : "indisponível"}
             </span>
           </div>
-          ${canManageBusiness() ? `<button class="ghost-button" data-edit-product="${escapeHTML(product.id)}">Editar</button>` : ""}
+          ${canManageBusiness() ? `<form class="inline-price-form" data-price-product="${escapeHTML(product.id)}" novalidate>
+            <label for="price-${escapeHTML(product.id)}">Preço (R$)</label>
+            <div class="inline-price-controls"><input id="price-${escapeHTML(product.id)}" name="price" type="text" inputmode="decimal" autocomplete="off" value="${Number(product.price).toFixed(2).replace('.', ',')}" aria-label="Preço de ${escapeHTML(product.name)}" aria-describedby="price-status-${escapeHTML(product.id)}" />
+            <button class="primary-button" type="submit">Salvar</button></div>
+            <small id="price-status-${escapeHTML(product.id)}" role="status" aria-live="polite"></small>
+          </form><button class="ghost-button" data-edit-product="${escapeHTML(product.id)}">Editar</button>` : ""}
         </article>
       `;
     })
     .join("") || LuganoUI.empty("Seu catálogo está vazio","Cadastre o primeiro produto para começar.");
+}
+
+function parseProductPrice(value) {
+  const text = String(value).trim();
+  if (!/^\d{1,6}([,.]\d{1,2})?$/.test(text)) return null;
+  const cents = Math.round(Number(text.replace(',', '.')) * 100);
+  return cents > 0 && cents <= 99999999 ? cents : null;
+}
+
+async function saveInlineProductPrice(event) {
+  const form = event.target.closest('[data-price-product]');
+  if (!form) return;
+  event.preventDefault();
+  if (form.dataset.saving || !canManageBusiness()) return;
+  const input = form.elements.price;
+  const status = form.querySelector('[role="status"]');
+  const cents = parseProductPrice(input.value);
+  input.setAttribute('aria-invalid', String(cents === null));
+  status.className = cents === null ? 'price-error' : '';
+  if (cents === null) {
+    status.textContent = 'Informe um preço maior que zero, com até 2 casas decimais (ex.: 19,90).';
+    input.focus();
+    return;
+  }
+  const product = state.products.find(item => item.id === form.dataset.priceProduct);
+  if (!product) return;
+  if (cents === Math.round(Number(product.price) * 100)) {
+    status.textContent = 'Este preço já está salvo.';
+    return;
+  }
+  form.dataset.saving = 'true';
+  form.setAttribute('aria-busy', 'true');
+  input.disabled = true;
+  status.textContent = 'Salvando preço…';
+  try {
+    await LuganoUI.busy(form.querySelector('button'), 'Salvando…', async () => {
+      const updated = await api('/api/v1/admin/products/' + encodeURIComponent(product.id), {
+        method: 'PATCH', body: JSON.stringify({price: (cents / 100).toFixed(2)})
+      });
+      product.price = updated.price;
+      input.value = Number(updated.price).toFixed(2).replace('.', ',');
+      form.closest('article').querySelector('[data-product-price-display]').textContent = money(updated.price);
+      status.textContent = 'Preço atualizado com sucesso.';
+      status.className = 'price-success';
+    });
+  } catch (error) {
+    status.className = 'price-error';
+    status.textContent = 'Não foi possível confirmar o preço. ' + error.message + ' Você pode tentar novamente.';
+  } finally {
+    delete form.dataset.saving;
+    form.removeAttribute('aria-busy');
+    input.disabled = false;
+  }
 }
 
 function renderCustomers() {
@@ -1205,6 +1263,7 @@ function filteredCollection(kind,items) {
  return items.filter(item=>[item.name,item.code,item.full_name,item.email,item.category,item.description].join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().includes(q));
 }
 function setupAdminUX() {
+ document.addEventListener('submit', saveInlineProductPrice);
  for(const [kind,container,render] of [["products","#products-list",renderProducts],["customers","#customers-table",renderCustomers],["promotions","#promotions-list",renderPromotions]]) {
  const input=document.createElement("input"); input.id=kind+"-search";input.type="search";input.className="admin-collection-search";input.placeholder="Buscar nesta lista";input.setAttribute("aria-label","Buscar nesta lista");
  input.value=localStorage.getItem("lugano.admin.search."+kind) || "";

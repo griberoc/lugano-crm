@@ -1,0 +1,13 @@
+.inline-price-form { display: grid; grid-column: 1 / -1; gap: .4rem; min-width: 0; width: min(100%, 24rem); margin: 0; }
+.inline-price-form label { font-size: .8rem; font-weight: 600; }
+.inline-price-controls { display: flex; gap: .5rem; align-items: center; }
+.inline-price-controls input { min-width: 0; width: 7rem; min-height: 44px; font-size: 16px; font-variant-numeric: tabular-nums; }
+.inline-price-controls button { min-height: 44px; }
+.inline-price-form small { font-size: .8rem; line-height: 1.4; }
+.inline-price-form .price-error { color: #a32121; }
+.inline-price-form .price-success { color: #216440; }
+@media (max-width: 640px) {
+  .product-list-item { flex-wrap: wrap; }
+  .inline-price-form { width: 100%; flex-basis: 100%; }
+  .inline-price-controls input { flex: 1; }
+}

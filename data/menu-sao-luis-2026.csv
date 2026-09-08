@@ -1,0 +1,122 @@
+slide,category,name,price,description
+3,Cafés tradicionais,Espresso simples,9.90,Blend exclusivo Lugano e 3 Corações.
+3,Cafés tradicionais,Espresso duplo,13.90,Dose dupla de espresso.
+3,Cafés tradicionais,Carioca simples,9.90,Café suave.
+3,Cafés tradicionais,Carioca duplo,13.90,Dose dupla de café carioca.
+3,Cafés tradicionais,Coado - Método V60,14.90,Café 100% arábica filtrado na hora.
+4,Cafés tradicionais,Coado descafeinado - Método V60,14.90,Café descafeinado filtrado na hora.
+4,Cafés tradicionais,Macchiato,15.90,Espresso com um toque de crema de leite.
+4,Cafés tradicionais,Cortado,14.90,Espresso com leite vaporizado.
+4,Cafés tradicionais,Latte,16.90,Café com leite.
+4,Cafés tradicionais,Café Gourmand,23.90,Espresso duplo com seleção de chocolates Lugano.
+5,Cafés especiais,Cappuccino clássico,22.90,
+5,Cafés especiais,Cappuccino italiano,22.90,Café com leite vaporizado e chocolate Lugano 50% cacau.
+5,Cafés especiais,Cappuccino especial Lugano,27.90,Creme de avelã Lugano com chocolate quente e espresso. Finalizado com chantilly.
+5,Cafés especiais,Cappuccino doce de leite,27.90,
+5,Cafés especiais,Mocaccino,24.90,Espresso com leite vaporizado e chocolate Lugano.
+5,Cafés especiais,Mocaccino Gato Mimi,26.90,Com chocolate Lugano e canela. Finalizado com Gato Mimi.
+6,Cafés gelados,Iced Latte,19.90,Espresso gelado com leite e baunilha.
+6,Cafés gelados,Iced Latte Caramelo,26.90,Leite e espresso gelado com caramelo artesanal.
+6,Cafés gelados,Iced Cappuccino,19.90,
+6,Cafés gelados,Affogato,22.90,Sorvete de creme com café espresso.
+8,Chocolates,Chocolate quente médio,17.00,
+8,Chocolates,Chocolate quente grande,22.90,
+8,Chocolates,Chocolate quente com chantilly,26.90,
+8,Chocolates,Chocolate quente com avelã,26.90,
+8,Chocolates,Chocolate quente Zero Zero,24.90,Tablete Zero Zero com leite vegetal. Sem adição de açúcares e sem lactose conforme cardápio.
+8,Chocolates,Chocolate Lugano gelado,22.90,
+10,Frappés,Frappé de creme de avelã,28.90,
+10,Frappés,Frappé de Cookies Lugano,28.90,
+10,Frappés,Frappé de pistache,31.90,
+12,Salgados,Pão de queijo,9.90,
+12,Salgados,Mini pão de queijo - 6 unidades,17.90,Porção com 6 unidades.
+12,Salgados,Pão na chapa,11.90,Ciabatta dourada na manteiga.
+12,Salgados,Pão na chapa com requeijão,13.90,
+12,Salgados,Coxinha de frango com requeijão,17.90,
+12,Salgados,Quiche,23.90,Consulte os sabores disponíveis.
+12,Salgados,Tapioca,12.90,Consulte as opções de recheio.
+13,Croissants,Croissant amanteigado,24.90,
+13,Croissants,Croissant caprese,38.90,Mussarela de búfala com tomate e rúcula. Finalizado com pesto.
+13,Croissants,Croissant presunto e queijo,34.90,
+14,Sanduíches,Sanduíche caprese,34.90,Ciabatta com mussarela de búfala e tomate. Com pesto e rúcula.
+14,Sanduíches,Misto quente,22.90,Pão tostado com presunto e queijo. Com requeijão cremoso.
+14,Sanduíches,Croque Monsieur,34.90,Pão tostado com presunto e queijo ao molho bechamel.
+14,Sanduíches,Croque Madame,36.90,Croque Monsieur finalizado com ovo.
+14,Sanduíches,Ciabatta mignon,49.90,Ciabatta com filé mignon e queijo derretido. Com toque de maionese.
+14,Sanduíches,Club Sandwich,35.90,Pão tostado com frango e bacon. Com alface e tomate.
+15,Ovos,Ovos mexidos com salada,24.90,
+15,Ovos,Ovos mexidos com bacon,28.90,Acompanha torradas douradas.
+15,Ovos,Ovo na panelinha,29.90,Ovo ao molho de tomate com queijo gratinado. Acompanha torradinhas.
+17,Sobremesas Lugano,Bolo de vó,16.90,Consulte as opções. Cobertura de ganache vendida separadamente.
+17,Sobremesas Lugano,Brownie,21.90,
+17,Sobremesas Lugano,Brownie com sorvete,26.90,Com sorvete de creme e ganache Lugano.
+17,Sobremesas Lugano,Croissant de morango,35.90,Croissant com chocolate derretido e morangos frescos.
+17,Sobremesas Lugano,Croissant de pistache,42.90,Croissant folhado com ganache de pistache Lugano.
+17,Sobremesas Lugano,Waffle,34.90,2 unidades com frutas. Escolha a cobertura: mel ou creme de avelã ou chocolate Lugano.
+19,Sobremesas Lugano,Torta Lugano,28.90,Com chocolates branco e ao leite.
+19,Sobremesas Lugano,Taça Lugano,46.90,Cremes de chocolate ao leite e branco. Finalizada com morangos picados e ganache.
+19,Sobremesas Lugano,Fondue individual,69.90,Frutas com chocolate ao leite Lugano.
+19,Sobremesas Lugano,Fondue para compartilhar - chocolate,129.90,Chocolate ao leite com frutas e waffle tradicional.
+21,Saladas,Salada Caesar,39.90,Alface com frango grelhado e tomate-cereja. Molho caesar com croutons e parmesão.
+21,Saladas,Salada caprese,35.90,Tomates com mussarela de búfala e manjericão. Com azeite e aceto balsâmico.
+21,Almoços,Escondidinho de carne de panela,39.90,Carne de panela desfiada com purê cremoso e parmesão.
+21,Almoços,Torta cremosa de frango,39.90,Frango desfiado com requeijão em massa folhada.
+22,Almoços,Ravioli de queijo ao pomodoro,42.90,Massa recheada com queijo ao molho de tomate artesanal.
+22,Almoços,Penne ao molho branco com frango e sálvia,45.90,Com tomate-cereja e parmesão ralado.
+22,Almoços,Farfalle ao limone com camarões,89.90,Massa com camarões ao molho cremoso de limão-siciliano.
+22,Almoços,Lasanha bolonhesa,49.90,Com molho bolonhesa e bechamel. Gratinada com queijo.
+23,Pizzas,Pizza calabresa,42.90,
+23,Pizzas,Pizza margherita,42.90,
+24,Bebidas diversas,Água sem gás,7.90,
+24,Bebidas diversas,Água com gás,7.90,
+24,Bebidas diversas,Suco,14.90,Consulte as opções disponíveis.
+24,Bebidas diversas,Refrigerante,9.90,Consulte as opções disponíveis.
+24,Bebidas diversas,Chá Tea Shop,17.90,Quente ou gelado. Consulte as opções disponíveis.
+25,Especiais da casa,Café com borda com doce de leite,26.90,
+25,Especiais da casa,Ice Cappuccino avelã,28.90,
+25,Especiais da casa,Empada de frango,19.90,
+25,Especiais da casa,Empada de carne de sol,21.90,
+25,Especiais da casa,Empadão de frango,25.90,
+25,Especiais da casa,Empadão de camarão,28.90,
+25,Especiais da casa,Omelete ou crepioca simples,21.90,Informe sua escolha nas observações.
+25,Especiais da casa,Pão de queijo com costelinha,31.90,
+25,Especiais da casa,Cuscuz simples,9.90,
+25,Especiais da casa,Cuscuz recheado,23.90,
+25,Especiais da casa,Wrap de frango,20.90,
+25,Especiais da casa,Sanduíche natural,21.90,
+26,Especiais da casa,Sanduíche de costelinha,31.90,
+26,Especiais da casa,Croissant de salame,31.90,Salame com requeijão e queijo derretido.
+26,Especiais da casa,Fondue para compartilhar - queijo,129.90,Acompanha batatinha e tomate-cereja. Com goiabada e linguiça e torradinhas ao queijo especial da casa. Filé mignon vendido separadamente.
+26,Especiais da casa,Salgados,17.90,Consulte as opções disponíveis.
+26,Especiais da casa,Espaguete ao molho sugo,39.90,
+26,Especiais da casa,Milk shake,24.90,
+26,Especiais da casa,Taça de sorvete,28.90,
+26,Especiais da casa,Frutas picadas,19.90,
+3,Extras,Adicional de chantilly,7.90,Adicional para cafés e chocolates.
+3,Extras,Adicional de leite vegetal,7.90,Adicional para cafés.
+12,Extras,Adicional de requeijão,4.90,
+12,Extras,Adicional de presunto,6.90,
+12,Extras,Adicional de queijo,4.90,
+15,Extras,Adicional de ovo,5.90,
+15,Extras,Adicional de salada,7.90,
+15,Extras,Adicional de torradas,7.90,
+15,Extras,Adicional de bacon,8.90,
+17,Extras,Adicional de ganache de chocolate ao leite,12.90,
+17,Extras,Adicional de chocolate ao leite,14.90,
+17,Extras,Adicional de chocolate branco,14.90,
+17,Extras,Adicional de morango - brownie e waffle,9.90,Preço da página 17 de sobremesas.
+17,Extras,Adicional de sorvete - brownie e waffle,7.90,Preço da página 17 de sobremesas.
+19,Extras,Adicional de morango - fondue e taças,4.90,Preço da página 19 de sobremesas.
+19,Extras,Adicional de sorvete - fondue e taças,9.90,Preço da página 19 de sobremesas.
+27,Extras,Adicional de doce de leite,7.90,
+27,Extras,Adicional de frutas,7.90,
+27,Extras,Adicional de leite,7.90,
+27,Extras,Adicional de salame,6.90,
+27,Extras,Adicional de peito de peru,7.90,
+27,Extras,Adicional de filé mignon - 100 g,18.90,
+27,Extras,Adicional de costelinha,24.90,
+27,Extras,Adicional de frango,16.90,
+27,Extras,Adicional de presunto Parma,9.90,
+27,Extras,Adicional de queijo mussarela,7.90,
+27,Extras,Adicional de queijo coalho,8.90,
+27,Extras,Adicional de cebola caramelizada,5.90,
