@@ -52,15 +52,15 @@ const state = {
 };
 
 const titles = {
-  overview: ["Visao Geral", "Operacao comercial, pedidos e campanhas."],
-  orders: ["Pedidos", "Acompanhamento e gestao do delivery."],
-  products: ["Produtos", "Catalogo vendido no delivery."],
-  customers: ["Clientes", "Base de clientes e historico."],
-  promotions: ["Campanhas", "Cupons, descontos e frete gratis."],
-  reports: ["Relatorios", "Faturamento, rankings, recorrencia e cupons."],
-  audit: ["Auditoria", "Registro de acoes administrativas."],
-  team: ["Equipe", "Acessos administrativos e papeis do time."],
-  settings: ["Acesso", "Sessao administrativa."],
+  overview: ["Visão Geral", "Operação comercial, pedidos e campanhas."],
+  orders: ["Pedidos", "Acompanhamento e gestão do delivery."],
+  products: ["Produtos", "Catálogo vendido no delivery."],
+  customers: ["Clientes", "Base de clientes e histórico."],
+  promotions: ["Campanhas", "Cupons, descontos e frete grátis."],
+  reports: ["Relatórios", "Faturamento, rankings, recorrência e cupons."],
+  audit: ["Auditoria", "Registro de ações administrativas."],
+  team: ["Equipe", "Acessos administrativos e papéis do time."],
+  settings: ["Acesso", "Sessão administrativa."],
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -82,8 +82,8 @@ const paymentStatusLabels = {
 };
 const paymentMethodLabels = {
   pix: "Pix",
-  credit_card: "Cartao de credito",
-  debit_card: "Cartao de debito",
+  credit_card: "Cartão de crédito",
+  debit_card: "Cartão de débito",
   cash: "Dinheiro",
 };
 const auditActionLabels = {
@@ -174,12 +174,12 @@ function customerName(order) {
 
 function customerContact(order) {
   const customer = order?.customer;
-  if (!customer) return "Cliente nao encontrado";
+  if (!customer) return "Cliente não encontrado";
   return [customer.email, customer.phone].filter(Boolean).join(" | ") || "Sem contato";
 }
 
 function formatAddress(address) {
-  if (!address) return "Endereco nao encontrado";
+  if (!address) return "Endereço não encontrado";
   return `${address.label || "Entrega"}: ${address.street}, ${address.number} - ${address.neighborhood}, ${address.city} (${address.zip_code})${address.complement ? ` - ${address.complement}` : ""}`;
 }
 
@@ -188,10 +188,11 @@ function orderItems(order) {
 }
 
 function orderNextStatus(order) {
-  if (!order || ["delivered", "cancelled"].includes(order.status)) return null;
-  const currentIndex = orderFlow.indexOf(order.status);
-  if (currentIndex === -1 || currentIndex >= orderFlow.length - 1) return null;
-  return orderFlow[currentIndex + 1];
+ if(!order || ["delivered","cancelled"].includes(order.status))return null;
+ const index=orderFlow.indexOf(order.status), next=orderFlow[index+1];
+ if(index<0 || !next)return null;
+ if(["preparing","out_for_delivery","delivered"].includes(next) && order.payment_status!=="paid")return null;
+ return next;
 }
 
 function orderItemCount(order) {
@@ -200,16 +201,11 @@ function orderItemCount(order) {
 
 function addressSummary(order) {
   const address = order?.address;
-  if (!address) return "Endereco pendente";
+  if (!address) return "Endereço pendente";
   return [address.neighborhood, address.city].filter(Boolean).join(" - ") || formatAddress(address);
 }
 
-function paintNotice(notice, message, type = "info") {
-  if (!notice) return;
-  notice.textContent = message;
-  notice.classList.remove("hidden");
-  notice.style.borderLeftColor = type === "error" ? "var(--danger)" : "var(--brand-2)";
-}
+function paintNotice(node,message,type="info") { LuganoUI.notice(node,message,type); LuganoUI.toast(message,type); }
 
 function hideNotice(selector) {
   const notice = $(selector);
@@ -320,31 +316,7 @@ function clearAdminSession() {
   persistAdminSession();
 }
 
-async function api(path, options = {}) {
-  const response = await fetch(`${state.apiBaseUrl}${path}`, {
-    ...options,
-    headers: {
-      ...headers(),
-      ...(options.headers || {}),
-    },
-  });
-
-  if (!response.ok) {
-    let detail = response.statusText;
-    try {
-      const body = await response.json();
-      detail = body.detail || JSON.stringify(body);
-    } catch {
-      detail = await response.text();
-    }
-    const error = new Error(detail);
-    error.status = response.status;
-    throw error;
-  }
-
-  if (response.status === 204) return null;
-  return response.json();
-}
+async function api(path, options = {}) { return LuganoUI.request(state.apiBaseUrl + path,{...options, headers:{"Content-Type":"application/json",...headers(),...(options.headers || {})}}); }
 
 function setView(view) {
   const target = $(`#view-${view}`);
@@ -360,6 +332,10 @@ function setView(view) {
   });
   $("#view-title").textContent = titles[view][0];
   $("#view-subtitle").textContent = titles[view][1];
+  localStorage.setItem("lugano.admin.view",view);
+  document.body.classList.remove("admin-detail-open");
+  $$(".nav-tab").forEach(b=>b.setAttribute("aria-current",b.dataset.view===view?"page":"false"));
+  if(innerWidth<=1000) $('.nav-tab.active')?.scrollIntoView({block:"nearest",inline:"center",behavior:"instant"});
 }
 
 function renderMetrics() {
@@ -410,18 +386,19 @@ function renderOrders() {
   $("#orders-status-board").innerHTML = Object.entries(orderStatusLabels)
     .map(
       ([status, label]) => `
-        <article class="status-tile">
+        <button type="button" class="status-tile" data-status-filter="${escapeHTML(status)}" aria-label="Filtrar ${escapeHTML(label)}">
           <span>${label}</span>
           <strong>${counts[status] || 0}</strong>
-        </article>
+        </button>
       `,
     )
     .join("");
 
   $("#orders-queue-count").textContent = `${state.orders.length} ${state.orders.length === 1 ? "pedido" : "pedidos"}`;
 
-  $("#orders-queue").innerHTML = state.orders.length
-    ? state.orders
+  const visibleOrders=state.orders.filter(o=>(!$("#order-status-filter").value || o.status===$("#order-status-filter").value) && (customerName(o)+" "+o.id).toLowerCase().includes(($("#order-search")?.value || "").toLowerCase()));
+  $("#orders-queue").innerHTML = visibleOrders.length
+    ? visibleOrders
         .map((order) => {
           const next = orderNextStatus(order);
           return `
@@ -430,7 +407,7 @@ function renderOrders() {
                 <div>
                   <span class="queue-id">#${shortId(order.id)}</span>
                   <strong>${escapeHTML(customerName(order))}</strong>
-                  <p>${formatDateTime(order.placed_at)}</p>
+                  <p>${formatDateTime(order.placed_at)} · ${orderAge(order)}</p>
                 </div>
                 <span class="status ${escapeHTML(order.status)}">${escapeHTML(orderStatusLabels[order.status] || order.status)}</span>
               </div>
@@ -444,7 +421,7 @@ function renderOrders() {
                 <div class="table-actions">
                   <button class="small-button" data-order-select="${escapeHTML(order.id)}" type="button">Abrir</button>
                   <button class="small-button primary-action" data-order-next="${escapeHTML(order.id)}" type="button" ${!next ? "disabled" : ""}>
-                    ${next ? orderStatusLabels[next] : "Concluido"}
+                    ${next ? orderStatusLabels[next] : "Concluído"}
                   </button>
                 </div>
               </div>
@@ -469,7 +446,7 @@ function renderOrderDetail() {
     panel.innerHTML = `
       <div class="empty-state">
         <h2>Selecione um pedido</h2>
-        <p>Veja itens, cliente, entrega, observacoes e atualize o status.</p>
+        <p>Veja itens, cliente, entrega, observações e atualize o status.</p>
       </div>
     `;
     return;
@@ -478,7 +455,7 @@ function renderOrderDetail() {
   const items = orderItems(order);
   const nextStatus = orderNextStatus(order);
   panel.innerHTML = `
-    <div class="order-detail-heading detail-hero">
+    <button id="back-to-queue" class="ghost-button" type="button">Voltar à fila</button><div class="order-detail-heading detail-hero">
       <div>
         <span class="muted">Pedido #${shortId(order.id)}</span>
         <h2>${escapeHTML(customerName(order))}</h2>
@@ -492,9 +469,9 @@ function renderOrderDetail() {
 
     <div class="quick-actions">
       <button class="primary-button" data-order-next="${escapeHTML(order.id)}" type="button" ${!nextStatus ? "disabled" : ""}>
-        ${nextStatus ? `Mover para ${orderStatusLabels[nextStatus]}` : "Sem proximo status"}
+        ${nextStatus ? `Mover para ${orderStatusLabels[nextStatus]}` : "Sem próximo status"}
       </button>
-      <span>${escapeHTML(paymentStatusLabels[order.payment_status] || order.payment_status)}</span>
+      <span>${order.payment_status !== "paid" ? "Confirme o pagamento antes de iniciar o preparo." : "Pagamento confirmado"}</span>
     </div>
 
     <div class="detail-grid">
@@ -506,7 +483,7 @@ function renderOrderDetail() {
       <article>
         <span>Entrega</span>
         <strong>${escapeHTML(formatAddress(order.address))}</strong>
-        <p>${escapeHTML(order.delivery_instructions || order.notes || "Sem observacoes de entrega")}</p>
+        <p>${escapeHTML(order.delivery_instructions || order.notes || "Sem observações de entrega")}</p>
       </article>
       <article>
         <span>Pagamento</span>
@@ -548,12 +525,13 @@ function renderOrderDetail() {
 
     <form class="detail-section order-update-form" id="order-update-form">
       <div class="detail-section-heading">
-        <h3>Atualizar operacao</h3>
+        <h3>Atualizar operação</h3>
         <span>Registro auditado</span>
       </div>
       <label>Status
         <select name="status">
           ${Object.entries(orderStatusLabels)
+            .filter(([value]) => value === order.status || value === nextStatus || (!["delivered","cancelled"].includes(order.status) && value === "cancelled"))
             .map(([value, label]) => `<option value="${value}" ${order.status === value ? "selected" : ""}>${label}</option>`)
             .join("")}
         </select>
@@ -565,22 +543,22 @@ function renderOrderDetail() {
             .join("")}
         </select>
       </label>
-      <label>Observacoes<textarea name="notes" rows="3">${escapeHTML(order.notes)}</textarea></label>
+      <label>Observações<textarea name="notes" rows="3">${escapeHTML(order.notes)}</textarea></label>
       <div class="button-row">
-        <button class="primary-button" type="submit">Salvar atualizacao</button>
-        <button class="ghost-button" data-order-next="${escapeHTML(order.id)}" type="button" ${["delivered", "cancelled"].includes(order.status) ? "disabled" : ""}>Avancar status</button>
+        <button class="primary-button" type="submit">Salvar atualização</button>
+
       </div>
     </form>
   `;
 }
 
 function renderProducts() {
-  $("#products-list").innerHTML = state.products
+  $("#products-list").innerHTML = filteredCollection("products",state.products)
     .map((product) => {
       const initial = String(product.name || "L").trim().slice(0, 1).toUpperCase();
-      const imageUrl = safeHttpUrl(product.image_url);
+      const imageUrl = LuganoUI.media(safeHttpUrl(product.image_url));
       const thumb = imageUrl
-        ? `<img src="${escapeHTML(imageUrl)}" alt="${escapeHTML(product.name)}" loading="lazy" />`
+        ? `<img src="${escapeHTML(imageUrl)}" alt="${escapeHTML(product.name)}" width="64" height="64" loading="lazy" />`
         : `<span>${escapeHTML(initial)}</span>`;
 
       return `
@@ -593,21 +571,22 @@ function renderProducts() {
             </div>
             <span class="muted">${escapeHTML(product.category)}</span>
             <span class="status ${product.available ? "active" : ""}">
-              ${product.available ? "disponivel" : "indisponivel"}
+              ${product.available ? "disponível" : "indisponível"}
             </span>
           </div>
+          ${canManageBusiness() ? `<button class="ghost-button" data-edit-product="${escapeHTML(product.id)}">Editar</button>` : ""}
         </article>
       `;
     })
-    .join("");
+    .join("") || LuganoUI.empty("Seu catálogo está vazio","Cadastre o primeiro produto para começar.");
 }
 
 function renderCustomers() {
-  $("#customers-table").innerHTML = state.customers
+  $("#customers-table").innerHTML = filteredCollection("customers",state.customers)
     .map(
       (customer) => `
         <tr>
-          <td>${escapeHTML(customer.full_name || "-")}</td>
+          <td>${escapeHTML(customer.full_name || "-")}${canManageBusiness() ? `<button class="ghost-button" data-edit-customer="${escapeHTML(customer.id)}">Editar</button>` : ""}</td>
           <td>${escapeHTML(customer.email || "-")}</td>
           <td>${escapeHTML(customer.phone || "-")}</td>
           <td>${formatDate(customer.created_at)}</td>
@@ -618,18 +597,18 @@ function renderCustomers() {
 }
 
 function renderPromotions() {
-  $("#promotions-list").innerHTML = state.promotions
+  $("#promotions-list").innerHTML = filteredCollection("promotions",state.promotions)
     .map(
       (promotion) => `
         <article class="list-item">
           <div class="list-item-header">
-            <strong>${escapeHTML(promotion.code)}</strong>
+            <strong>${escapeHTML(promotion.code)}</strong>${canManageBusiness() ? `<button class="ghost-button" data-edit-promotion="${escapeHTML(promotion.id)}">Editar</button>` : ""}
             <span class="status ${promotion.active ? "active" : ""}">
               ${promotion.active ? "ativa" : "inativa"}
             </span>
           </div>
           <span class="muted">${escapeHTML(promotion.description || promotion.type)}</span>
-          <span>${escapeHTML(promotion.type)} - ${escapeHTML(promotion.value)}</span>
+          <span>${escapeHTML(({percentage:"Desconto percentual",fixed:"Desconto em reais",free_delivery:"Entrega grátis"})[promotion.type] || "Benefício")} · ${escapeHTML(promotion.value)}</span>
         </article>
       `,
     )
@@ -643,7 +622,7 @@ function renderReports() {
     $("#report-average-ticket").textContent = money(0);
     $("#report-orders-count").textContent = "0";
     $("#report-coupon-uses").textContent = "0";
-    $("#report-summary-list").innerHTML = '<p class="muted">Relatorios ainda nao carregados.</p>';
+    $("#report-summary-list").innerHTML = '<p class="muted">Relatórios ainda não carregados.</p>';
     $("#report-products-table").innerHTML = emptyReportRow(4);
     $("#report-customers-table").innerHTML = emptyReportRow(4);
     $("#report-coupons-table").innerHTML = emptyReportRow(3);
@@ -663,7 +642,7 @@ function renderReports() {
 
   $("#report-summary-list").innerHTML = [
     ["Faturamento bruto", money(summary.gross_revenue)],
-    ["Faturamento liquido", money(summary.net_revenue)],
+    ["Faturamento líquido", money(summary.net_revenue)],
     ["Taxas de entrega", money(summary.delivery_fee_total)],
     ["Descontos em cupons", money(summary.coupon_discount_total)],
     ["Pedidos entregues", summary.delivered_orders_count],
@@ -734,7 +713,7 @@ function renderReports() {
 }
 
 function emptyReportRow(colspan) {
-  return `<tr><td class="muted" colspan="${colspan}">Nenhum dado no periodo.</td></tr>`;
+  return `<tr><td class="muted" colspan="${colspan}">Nenhum dado no período.</td></tr>`;
 }
 
 function auditDetails(log) {
@@ -783,10 +762,10 @@ function renderTeam() {
           <td>${escapeHTML(user.full_name || shortId(user.profile_id))}</td>
           <td>${escapeHTML(user.email || "-")}</td>
           <td>
-            <select class="table-control" data-admin-role="${escapeHTML(user.profile_id)}">
-              <option value="staff" ${user.role === "staff" ? "selected" : ""}>Staff</option>
-              <option value="manager" ${user.role === "manager" ? "selected" : ""}>Manager</option>
-              <option value="owner" ${user.role === "owner" ? "selected" : ""}>Owner</option>
+            <select class="table-control" data-admin-role="${escapeHTML(user.profile_id)}" aria-label="Papel de ${escapeHTML(user.full_name || user.email)}">
+              <option value="staff" ${user.role === "staff" ? "selected" : ""}>Atendente</option>
+              <option value="manager" ${user.role === "manager" ? "selected" : ""}>Gerente</option>
+              <option value="owner" ${user.role === "owner" ? "selected" : ""}>Proprietário</option>
             </select>
           </td>
           <td>
@@ -818,12 +797,21 @@ function renderAll() {
   renderAuditLogs();
   renderTeam();
   applyRoleAccess();
+  labelTables();
 }
 
+async function collection(path) {
+ const items=[];let batch;
+ for(let page=1;page<=20;page++) {
+   batch=await api(path+(path.includes("?")?"&":"?")+"page="+page+"&page_size=100");
+   items.push(...batch);if(batch.length<100)return items;
+ }
+ showNotice("Exibindo os 2.000 registros mais recentes desta lista. Consulte os relatórios para o histórico completo.");
+ return items;
+}
 async function loadOrders() {
-  const filter = $("#order-status-filter").value;
-  const query = filter ? `?status=${encodeURIComponent(filter)}` : "";
-  state.orders = await api(`/api/v1/admin/orders${query}`);
+  state.orders = await collection("/api/v1/admin/orders");
+  state.orders.sort((a,b)=>{ const done=o=>["delivered","cancelled"].includes(o.status)?1:0;return done(a)-done(b) || new Date(a.placed_at)-new Date(b.placed_at); });
   if (!state.orders.some((order) => order.id === state.selectedOrderId)) {
     state.selectedOrderId = state.orders[0]?.id || null;
   }
@@ -835,15 +823,15 @@ async function loadOrders() {
 }
 
 async function loadProducts() {
-  state.products = await api("/api/v1/admin/products");
+  state.products = await collection("/api/v1/admin/products");
 }
 
 async function loadCustomers() {
-  state.customers = await api("/api/v1/admin/customers");
+  state.customers = await collection("/api/v1/admin/customers");
 }
 
 async function loadPromotions() {
-  state.promotions = await api("/api/v1/admin/promotions");
+  state.promotions = await collection("/api/v1/admin/promotions");
 }
 
 async function loadReports() {
@@ -855,7 +843,7 @@ async function loadReports() {
 }
 
 async function loadAdminUsers() {
-  state.adminUsers = await api("/api/v1/admin/users");
+  state.adminUsers = await collection("/api/v1/admin/users");
 }
 
 async function loadAuditLogs() {
@@ -871,46 +859,32 @@ async function loadAuditLogsIfAllowed() {
 }
 
 async function loadDashboard() {
-  if (!hasAdminCredential()) {
-    setConnectionStatus("Aguardando acesso", false);
-    renderAuthStatus();
-    return;
-  }
-
+  if(!hasAdminCredential()) {setConnectionStatus("Aguardando acesso",false);renderAuthStatus();return;}
   renderAuthStatus();
-
-  try {
-    const loaders = [loadOrders(), loadProducts(), loadCustomers()];
-    if (canManageBusiness()) {
-      loaders.push(loadPromotions());
-      loaders.push(loadReports());
-    } else {
-      state.promotions = [];
-      state.reports = null;
-    }
-    if (canManageTeam()) {
-      loaders.push(loadAdminUsers());
-      loaders.push(loadAuditLogs());
-    } else {
-      state.adminUsers = [];
-      state.auditLogs = [];
-    }
-
-    await Promise.all(loaders);
-    renderAll();
-    setConnectionStatus("Conectado", true);
-  } catch (error) {
-    if ([401, 403].includes(error.status)) {
-      clearAdminSession();
-      setConnectionStatus("Aguardando login", false);
-      renderAuthStatus();
-      showNotice("Sessao administrativa expirada. Entre novamente.", "error");
-      return;
-    }
-
-    setConnectionStatus("Falha ao carregar", false);
-    showNotice(`Falha ao carregar dados administrativos: ${error.message}`, "error");
+  setConnectionStatus("Carregando operação…",false);
+  const tasks=[["orders",loadOrders],["products",loadProducts],["customers",loadCustomers]];
+  if(canManageBusiness())tasks.push(["promotions",loadPromotions],["reports",loadReports]);
+  if(canManageTeam())tasks.push(["team",loadAdminUsers],["audit",loadAuditLogs]);
+  document.querySelectorAll(".admin-load-notice").forEach(node=>node.remove());
+  for(const [name] of tasks) $("#view-"+name).setAttribute("aria-busy","true");
+  if(!state.orders.length) $("#orders-queue").innerHTML=LuganoUI.skeleton(2);
+  for(const [name,id] of [["products","#products-list"],["promotions","#promotions-list"]]) if(!state[name].length)$(id).innerHTML=LuganoUI.skeleton(2);
+  const results=await Promise.allSettled(tasks.map(([,load])=>load()));
+  for(const [name] of tasks) $("#view-"+name).removeAttribute("aria-busy");
+  if(results.some(r=>r.status==="rejected" && r.reason.status===401)) {
+    clearAdminSession();renderAuthStatus();setConnectionStatus("Aguardando login",false);
+    showNotice("Sessão administrativa expirada. Entre novamente.","error");return;
   }
+  renderAll();
+  let failures=0;
+  results.forEach((result,i)=>{
+    if(result.status!=="rejected")return;failures++;
+    const node=document.createElement("div");node.className="notice error admin-load-notice";node.setAttribute("role","alert");
+    node.innerHTML='<span>'+escapeHTML(result.reason.message)+'</span> <button class="ghost-button" data-retry-admin>Tentar novamente</button>';
+    $("#view-"+tasks[i][0]).prepend(node);
+  });
+  setConnectionStatus(failures?"Atualização parcial":"Atualizado às "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}),!failures);
+  if(failures)showNotice("Algumas seções não puderam ser atualizadas. Os dados anteriores foram mantidos.","error");
 }
 
 function formData(form) {
@@ -929,17 +903,15 @@ async function createProduct(event) {
   const form = event.currentTarget;
   try {
     const data = formData(form);
-    await api("/api/v1/admin/products", {
-      method: "POST",
+    await api("/api/v1/admin/products" + (form.dataset.editId ? "/" + encodeURIComponent(form.dataset.editId) : ""), {
+      method: form.dataset.editId ? "PATCH" : "POST",
       body: JSON.stringify(data),
     });
-    form.reset();
-    await loadProducts();
-    await loadAuditLogsIfAllowed();
-    renderAll();
-    showNotice("Produto criado e listado no catalogo.");
+    form.reset();form.closest("dialog")?.close();delete form.dataset.editId;
+    showNotice("Produto salvo no catálogo.","success");
+    await loadDashboard();
   } catch (error) {
-    showNotice(`Nao foi possivel criar o produto: ${error.message}`, "error");
+    showNotice(`Não foi possível criar o produto: ${error.message}`, "error");
   }
 }
 
@@ -950,20 +922,19 @@ async function createPromotion(event) {
     const data = formData(form);
     data.min_order_cents = Number(data.min_order_cents || 0);
     data.max_uses = data.max_uses ? Number(data.max_uses) : null;
-    await api("/api/v1/admin/promotions", {
-      method: "POST",
+    await api("/api/v1/admin/promotions" + (form.dataset.editId ? "/" + encodeURIComponent(form.dataset.editId) : ""), {
+      method: form.dataset.editId ? "PATCH" : "POST",
       body: JSON.stringify(data),
     });
     form.reset();
     form.elements.active.checked = true;
     form.elements.value.value = 0;
     form.elements.min_order_cents.value = 0;
-    await loadPromotions();
-    await loadAuditLogsIfAllowed();
-    renderAll();
-    showNotice("Campanha criada.");
+    form.closest("dialog")?.close();delete form.dataset.editId;
+    showNotice("Campanha salva.","success");
+    await loadDashboard();
   } catch (error) {
-    showNotice(`Nao foi possivel criar a campanha: ${error.message}`, "error");
+    showNotice(`Não foi possível criar a campanha: ${error.message}`, "error");
   }
 }
 
@@ -978,9 +949,9 @@ async function refreshReports(event) {
   try {
     await loadReports();
     renderReports();
-    showNotice("Relatorios atualizados.");
+    showNotice("Relatórios atualizados.");
   } catch (error) {
-    showNotice(`Nao foi possivel carregar relatorios: ${error.message}`, "error");
+    showNotice(`Não foi possível carregar relatórios: ${error.message}`, "error");
   }
 }
 
@@ -997,7 +968,7 @@ async function refreshAuditLogs(event) {
     renderAuditLogs();
     showNotice("Auditoria atualizada.");
   } catch (error) {
-    showNotice(`Nao foi possivel carregar auditoria: ${error.message}`, "error");
+    showNotice(`Não foi possível carregar auditoria: ${error.message}`, "error");
   }
 }
 
@@ -1018,7 +989,7 @@ async function createAdminUser(event) {
     renderAll();
     showNotice("Acesso administrativo salvo.");
   } catch (error) {
-    showNotice(`Nao foi possivel salvar o acesso: ${error.message}`, "error");
+    showNotice(`Não foi possível salvar o acesso: ${error.message}`, "error");
   }
 }
 
@@ -1033,7 +1004,7 @@ async function updateAdminUser(profileId, updates) {
     renderAll();
     showNotice("Acesso administrativo atualizado.");
   } catch (error) {
-    showNotice(`Nao foi possivel atualizar o acesso: ${error.message}`, "error");
+    showNotice(`Não foi possível atualizar o acesso: ${error.message}`, "error");
   }
 }
 
@@ -1044,17 +1015,21 @@ async function saveAdminUser(profileId) {
 }
 
 async function disableAdminUser(profileId) {
-  await updateAdminUser(profileId, { active: false });
+  if(confirm("Desativar o acesso deste integrante da equipe?")) await updateAdminUser(profileId, { active: false });
 }
 
 function selectOrder(orderId) {
   state.selectedOrderId = orderId;
   localStorage.setItem("lugano.admin.selectedOrderId", orderId);
   renderOrders();
+  document.body.classList.add("admin-detail-open");
+  $("#order-detail").scrollIntoView({block:"start",behavior:"smooth"});
 }
 
 async function updateOrder(orderId, updates) {
   try {
+    const previous=state.orders.find(o=>o.id===orderId);
+    if((updates.status==="cancelled" || (updates.payment_status==="paid" && previous?.payment_status!=="paid") || updates.status==="out_for_delivery" || updates.status==="delivered") && !confirm("Confirmar alteração do pedido #"+shortId(orderId)+"? "+(updates.status==="cancelled" ? "O pedido será cancelado." : updates.payment_status==="paid" && previous?.payment_status!=="paid" ? "Confirme que o pagamento foi recebido. Isso pode acionar preparo e entrega." : "O status de entrega será atualizado.")))return;
     await api(`/api/v1/admin/orders/${orderId}`, {
       method: "PATCH",
       body: JSON.stringify(updates),
@@ -1064,21 +1039,13 @@ async function updateOrder(orderId, updates) {
     renderAll();
     showNotice("Pedido atualizado.");
   } catch (error) {
-    showNotice(`Nao foi possivel atualizar o pedido: ${error.message}`, "error");
+    showNotice(`Não foi possível atualizar o pedido: ${error.message}`, "error");
   }
 }
 
 async function advanceOrder(orderId) {
-  const order = state.orders.find((item) => item.id === orderId);
-  if (!order) return;
-  const currentIndex = orderFlow.indexOf(order.status);
-  if (currentIndex === -1 || currentIndex >= orderFlow.length - 1) return;
-  const next = orderFlow[Math.min(currentIndex + 1, orderFlow.length - 1)];
-  await updateOrder(orderId, {
-    status: next,
-    payment_status: next === "delivered" ? "paid" : order.payment_status,
-    delivered_at: next === "delivered" ? new Date().toISOString() : null,
-  });
+ const order=state.orders.find(o=>o.id===orderId),next=orderNextStatus(order);if(!next)return;
+ await updateOrder(orderId,{status:next,payment_status:order.payment_status,delivered_at:next==="delivered"?new Date().toISOString():null});
 }
 
 async function saveSelectedOrder(event) {
@@ -1107,7 +1074,7 @@ async function loginAdmin(event) {
       }),
     });
     if (!auth.access_token || auth.admin?.auth_method !== "supabase") {
-      throw new Error("Usuario sem acesso administrativo ativo.");
+      throw new Error("Usuário sem acesso administrativo ativo.");
     }
 
     state.adminSession = {
@@ -1128,7 +1095,7 @@ async function loginAdmin(event) {
     clearAdminSession();
     renderAuthStatus();
     setConnectionStatus("Falha no acesso", false);
-    showNotice(`Nao foi possivel entrar no admin: ${error.message}`, "error");
+    showNotice(`Não foi possível entrar no admin: ${error.message}`, "error");
   }
 }
 
@@ -1145,7 +1112,7 @@ function logoutAdmin() {
   renderAll();
   renderAuthStatus();
   setConnectionStatus("Aguardando acesso", false);
-  showNotice("Sessao administrativa encerrada.");
+  showNotice("Sessão administrativa encerrada.");
 }
 
 function bindEvents() {
@@ -1154,28 +1121,24 @@ function bindEvents() {
   });
 
   $$("[data-refresh]").forEach((button) => {
-    button.addEventListener("click", loadDashboard);
+    button.addEventListener("click", () => LuganoUI.busy(button,"Atualizando…",loadDashboard));
   });
 
   $("#refresh-orders").addEventListener("click", async () => {
-    await loadOrders();
-    renderAll();
+    await LuganoUI.busy($("#refresh-orders"),"Atualizando…",async()=>{try { await loadOrders(); renderAll(); } catch(error) { showNotice(error.message,"error"); }});
   });
-  $("#order-status-filter").addEventListener("change", async () => {
-    await loadOrders();
-    renderAll();
-  });
-  $("#product-form").addEventListener("submit", createProduct);
-  $("#promotion-form").addEventListener("submit", createPromotion);
-  $("#reports-filter-form").addEventListener("submit", refreshReports);
-  $("#audit-filter-form").addEventListener("submit", refreshAuditLogs);
-  $("#team-form").addEventListener("submit", createAdminUser);
-  $("#admin-login-form").addEventListener("submit", loginAdmin);
+  $("#order-status-filter").addEventListener("change", () => renderOrders());
+  $("#product-form").addEventListener("submit", event=>{ event.preventDefault(); LuganoUI.busy(event.currentTarget.querySelector('button[type="submit"]'),"Salvando…",()=>createProduct(event)).catch(error=>showNotice(error.message,"error")); });
+  $("#promotion-form").addEventListener("submit", event=>{ event.preventDefault(); LuganoUI.busy(event.currentTarget.querySelector('button[type="submit"]'),"Salvando…",()=>createPromotion(event)).catch(error=>showNotice(error.message,"error")); });
+  $("#reports-filter-form").addEventListener("submit", event=>{ event.preventDefault(); LuganoUI.busy(event.currentTarget.querySelector('button[type="submit"]'),"Atualizando…",()=>refreshReports(event)).catch(error=>showNotice(error.message,"error")); });
+  $("#audit-filter-form").addEventListener("submit", event=>{ event.preventDefault(); LuganoUI.busy(event.currentTarget.querySelector('button[type="submit"]'),"Atualizando…",()=>refreshAuditLogs(event)).catch(error=>showNotice(error.message,"error")); });
+  $("#team-form").addEventListener("submit", event=>{ event.preventDefault(); LuganoUI.busy(event.currentTarget.querySelector('button[type="submit"]'),"Salvando…",()=>createAdminUser(event)).catch(error=>showNotice(error.message,"error")); });
+  $("#admin-login-form").addEventListener("submit", event=>{ event.preventDefault(); LuganoUI.busy(event.currentTarget.querySelector('button[type="submit"]'),"Entrando…",()=>loginAdmin(event)).catch(error=>showNotice(error.message,"error")); });
   $("#admin-logout").addEventListener("click", logoutAdmin);
 
   document.addEventListener("submit", async (event) => {
     if (event.target.matches("#order-update-form")) {
-      await saveSelectedOrder(event);
+      await LuganoUI.busy(event.target.querySelector('button[type="submit"]'),"Salvando…",()=>saveSelectedOrder(event));
     }
   });
 
@@ -1188,19 +1151,19 @@ function bindEvents() {
 
     const orderButton = event.target.closest("[data-order-next]");
     if (orderButton) {
-      await advanceOrder(orderButton.dataset.orderNext);
+      await LuganoUI.busy(orderButton,"Atualizando…",()=>advanceOrder(orderButton.dataset.orderNext));
       return;
     }
 
     const saveAdminButton = event.target.closest("[data-admin-save]");
     if (saveAdminButton) {
-      await saveAdminUser(saveAdminButton.dataset.adminSave);
+      await LuganoUI.busy(saveAdminButton,"Salvando…",()=>saveAdminUser(saveAdminButton.dataset.adminSave));
       return;
     }
 
     const disableAdminButton = event.target.closest("[data-admin-disable]");
     if (disableAdminButton) {
-      await disableAdminUser(disableAdminButton.dataset.adminDisable);
+      await LuganoUI.busy(disableAdminButton,"Desativando…",()=>disableAdminUser(disableAdminButton.dataset.adminDisable));
     }
   });
 }
@@ -1215,6 +1178,78 @@ function hydrateSettings() {
   renderAuthStatus();
 }
 
+
+function orderAge(order) {
+ if(["delivered","cancelled"].includes(order.status))return "Concluído";
+ const minutes=Math.max(0,Math.floor((Date.now()-new Date(order.placed_at))/60000));
+ return minutes<60 ? minutes+" min na fila" : Math.floor(minutes/60)+" h na fila";
+}
+function labelTables() {
+ document.querySelectorAll("table").forEach(table=>{
+ const labels=[...table.querySelectorAll("thead th")].map(th=>th.textContent);
+ table.querySelectorAll("tbody tr").forEach(row=>[...row.cells].forEach((cell,i)=>cell.dataset.label=labels[i] || ""));
+ });
+}
+function openEditor(kind,id,trigger) {
+ if(!canManageBusiness())return;
+ const form=$("#"+(kind==="product"?"product":"promotion")+"-form");
+ form.reset();delete form.dataset.editId;
+ const item=(kind==="product"?state.products:state.promotions).find(p=>p.id===id);
+ if(item){form.dataset.editId=id;for(const input of form.elements){if(!input.name)continue;if(input.type==="checkbox")input.checked=Boolean(item[input.name]);else input.value=item[input.name] ?? "";}}
+ if(kind==="product") {const preview=form.querySelector('img[alt="Prévia da imagem"]'),url=safeHttpUrl(form.elements.image_url.value);preview.hidden=!url;if(url)preview.src=LuganoUI.media(url);}
+ form.querySelector("h2").textContent=(item?"Editar ":"Novo ")+(kind==="product"?"produto":"campanha");
+ LuganoUI.openDialog(form.closest("dialog"),trigger);
+}
+function filteredCollection(kind,items) {
+ const q=($("#"+kind+"-search")?.value || "").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+ return items.filter(item=>[item.name,item.code,item.full_name,item.email,item.category,item.description].join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().includes(q));
+}
+function setupAdminUX() {
+ for(const [kind,container,render] of [["products","#products-list",renderProducts],["customers","#customers-table",renderCustomers],["promotions","#promotions-list",renderPromotions]]) {
+ const input=document.createElement("input"); input.id=kind+"-search";input.type="search";input.className="admin-collection-search";input.placeholder="Buscar nesta lista";input.setAttribute("aria-label","Buscar nesta lista");
+ input.value=localStorage.getItem("lugano.admin.search."+kind) || "";
+ const host=$(container); (host.closest(".table-wrap") || host).before(input);
+ input.oninput=()=>{localStorage.setItem("lugano.admin.search."+kind,input.value);render();labelTables();};
+ }
+
+ const status=$("#order-status-filter");status.value=localStorage.getItem("lugano.admin.orderFilter") || "";
+ status.addEventListener("change",()=>localStorage.setItem("lugano.admin.orderFilter",status.value));
+ const search=document.createElement("input");search.id="order-search";search.type="search";search.placeholder="Buscar pedido ou cliente";search.setAttribute("aria-label","Buscar pedido ou cliente");search.className="admin-search";
+ $(".orders-workbench").before(search);search.addEventListener("input",renderOrders);
+ for(const kind of ["product","promotion"]) {
+ const form=$("#"+kind+"-form"), dialog=document.createElement("dialog");
+ dialog.setAttribute("aria-label",kind==="product"?"Editar produto":"Editar campanha");
+ const button=document.createElement("button");button.type="button";button.className="primary-button editor-toggle";button.dataset.minRole="manager";button.textContent=kind==="product"?"Novo produto":"Nova campanha";
+ form.before(button);button.onclick=()=>openEditor(kind,null,button);
+ const close=document.createElement("button");close.type="button";close.className="ghost-button";close.textContent="Fechar";close.onclick=()=>dialog.close();
+ dialog.append(close,form);document.body.append(dialog);dialog.addEventListener("close",()=>dialog._trigger?.focus());
+ }
+ const imageInput=$("#product-form").elements.image_url, preview=document.createElement("img");
+ preview.width=120;preview.height=90;preview.alt="Prévia da imagem";preview.hidden=true;imageInput.after(preview);
+ imageInput.addEventListener("input",()=>{const url=safeHttpUrl(imageInput.value);preview.hidden=!url;if(url)preview.src=url;});
+ document.addEventListener("click",event=>{
+ const b=event.target.closest("button");if(!b)return;
+ if(b.hasAttribute("data-retry-admin")){LuganoUI.busy(b,"Atualizando…",loadDashboard);return;}
+ if(b.id==="back-to-queue"){document.body.classList.remove("admin-detail-open");return;}
+ if(b.dataset.statusFilter){status.value=b.dataset.statusFilter;status.dispatchEvent(new Event("change"));return;}
+ if(b.hasAttribute("data-edit-product"))openEditor("product",b.dataset.editProduct,b);
+ if(b.hasAttribute("data-edit-promotion"))openEditor("promotion",b.dataset.editPromotion,b);
+ if(b.hasAttribute("data-edit-customer"))editCustomer(b.dataset.editCustomer,b);
+ });
+ setView(localStorage.getItem("lugano.admin.view") in titles ? localStorage.getItem("lugano.admin.view") : "orders");
+}
+async function editCustomer(id,trigger) {
+ if(!canManageBusiness())return;
+ const customer=state.customers.find(c=>c.id===id);if(!customer)return;
+ const dialog=document.createElement("dialog");dialog.setAttribute("aria-label","Editar cliente");
+ dialog.innerHTML='<form><h2>Editar cliente</h2><label>Nome<input name="full_name" value="'+escapeHTML(customer.full_name)+'"></label><label>Email<input name="email" type="email" value="'+escapeHTML(customer.email)+'"></label><label>Telefone<input name="phone" type="tel" value="'+escapeHTML(customer.phone)+'"></label><div class="dialog-actions"><button class="ghost-button" type="button">Cancelar</button><button class="primary-button" type="submit">Salvar</button></div></form>';
+ document.body.append(dialog);dialog.querySelector('[type="button"]').onclick=()=>dialog.close();
+ dialog.addEventListener("close",()=>{trigger.focus();dialog.remove();});
+ dialog.querySelector("form").onsubmit=event=>{event.preventDefault();const form=event.currentTarget;LuganoUI.busy(form.querySelector('[type="submit"]'),"Salvando…",async()=>{try{await api("/api/v1/admin/customers/"+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify(formData(form))});await loadCustomers();renderCustomers();labelTables();dialog.close();showNotice("Cliente atualizado.","success");}catch(error){showNotice(error.message,"error");}});};
+ LuganoUI.openDialog(dialog,trigger);
+}
+
+setupAdminUX();
 bindEvents();
 hydrateSettings();
 loadDashboard();

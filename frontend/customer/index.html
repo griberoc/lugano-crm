@@ -4,13 +4,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Lugano | Minha Conta</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../design-system.css?v=heritage-20260710-1" />
     <link rel="stylesheet" href="./styles.css?v=profile-20260710-1" />
+    <link rel="stylesheet" href="../premium.css?v=20260908" />
   </head>
-  <body>
+  <body class="premium module-customer">
+    <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+    <header class="shop-header">
+      <a class="shop-brand" href="../orders/"><img src="../assets/lugano-logo-mark.svg" width="40" height="40" alt=""><span>Lugano<small>CAFETERIA &amp; CHOCOLATERIA</small></span></a>
+      <nav aria-label="Navegação principal"><a href="../orders/">Cardápio</a><a href="../customer/" aria-current="page">Minha Lugano</a></nav>
+      <div class="shop-session"><div class="session-actions">
+          <span id="session-label">Visitante</span>
+          <button class="ghost-button hidden" id="logout-button" type="button">Sair</button>
+        </div></div>
+    </header>
     <header class="customer-hero account-hero">
       <nav class="topnav">
         <a class="brand" href="../landing/index.html">
@@ -20,16 +27,13 @@
             <small>Minha conta</small>
           </span>
         </a>
-        <div class="session-actions">
-          <span id="session-label">Visitante</span>
-          <button class="ghost-button hidden" id="logout-button" type="button">Sair</button>
-        </div>
+
       </nav>
 
       <div class="hero-copy account-copy">
         <span>Minha Lugano</span>
-        <h1 id="customer-greeting">Seu clube de beneficios.</h1>
-        <p id="customer-summary">Acompanhe pontos, nivel, pedidos recentes e promocoes disponiveis.</p>
+        <h1 id="customer-greeting">Seu clube de benefícios.</h1>
+        <p id="customer-summary">Acompanhe pontos, nível, pedidos recentes e promoções disponíveis.</p>
         <div class="hero-actions">
           <a class="primary-button" href="../orders/" target="_top">Fazer pedido</a>
           <button class="ghost-button hero-refresh" id="refresh-dashboard" type="button">Atualizar painel</button>
@@ -37,19 +41,20 @@
       </div>
     </header>
 
-    <main class="customer-layout account-layout">
+    <main id="main-content" tabindex="-1" class="customer-layout account-layout">
       <section class="dashboard-column account-main">
         <div class="notice hidden" id="notice"></div>
 
-        <section class="account-overview" aria-label="Resumo da conta">
+        <section class="panel" id="active-order"></section><div class="notice hidden" id="uncertain-order">O envio anterior precisa ser conferido. Verifique o histórico e fale com a loja antes de repetir.<button class="ghost-button" id="clear-uncertain" type="button">Já conferi: posso iniciar outro pedido</button></div>
+<section class="account-overview" aria-label="Resumo da conta">
           <article class="loyalty-spotlight">
             <div class="spotlight-copy">
               <span class="section-kicker">Programa de fidelidade</span>
-              <h2 id="loyalty-headline">Entre para ver seus beneficios.</h2>
+              <h2 id="loyalty-headline">Entre para ver seus benefícios.</h2>
               <p id="loyalty-progress-label">Entre para ver seu progresso.</p>
             </div>
             <div class="spotlight-score">
-              <span>Pontos disponiveis</span>
+              <span>Pontos disponíveis</span>
               <strong id="loyalty-available">0</strong>
               <small id="tier-badge">Visitante</small>
             </div>
@@ -61,7 +66,7 @@
               <strong id="loyalty-total">0</strong>
             </article>
             <article>
-              <span>Nivel atual</span>
+              <span>Nível atual</span>
               <strong id="loyalty-tier">--</strong>
             </article>
             <article>
@@ -74,7 +79,7 @@
         <section class="panel loyalty-panel">
           <div class="panel-heading">
             <div>
-              <span class="section-kicker">Beneficios do nivel</span>
+              <span class="section-kicker">Benefícios do nível</span>
               <h2>Seu progresso</h2>
             </div>
           </div>
@@ -89,7 +94,7 @@
             <div class="panel-heading">
               <div>
                 <span class="section-kicker">Pedidos</span>
-                <h2>Ultimos pedidos</h2>
+                <h2>Últimos pedidos</h2>
               </div>
               <a class="ghost-button compact-action" href="../orders/" target="_top">Novo pedido</a>
             </div>
@@ -100,7 +105,7 @@
             <div class="panel-heading">
               <div>
                 <span class="section-kicker">Campanhas</span>
-                <h2>Promocoes disponiveis</h2>
+                <h2>Promoções disponíveis</h2>
               </div>
             </div>
             <div class="promotions-list" id="promotions-list"></div>
@@ -118,20 +123,20 @@
         </section>
       </section>
 
-      <aside class="account-column account-settings" aria-label="Dados da conta">
+      <details class="account-column account-settings"><summary class="ghost-button settings-toggle">Meus dados, endereços e preferências</summary><div class="settings-content"><button type="button" class="ghost-button mobile-only" data-logout-session>Sair da conta</button>
         <section class="panel session-panel" id="account-access-panel">
           <div>
             <h2>Acesso</h2>
             <p id="auth-summary">Nenhuma conta conectada.</p>
           </div>
-          <a class="primary-button" href="../client/#/acesso" target="_top">Entrar ou criar conta</a>
+          <a class="primary-button" href="../auth/" target="_top">Entrar ou criar conta</a>
         </section>
 
         <section class="panel compact-panel">
           <div class="panel-heading">
             <div>
               <h2>Dados pessoais</h2>
-              <p>Nome, telefone e aniversario para relacionamento.</p>
+              <p>Nome, telefone e aniversário para relacionamento.</p>
             </div>
           </div>
           <form id="profile-form">
@@ -145,13 +150,13 @@
         <section class="panel compact-panel">
           <div class="panel-heading">
             <div>
-              <h2>Enderecos salvos</h2>
+              <h2>Endereços salvos</h2>
               <p>Locais usados no delivery.</p>
             </div>
           </div>
           <div class="addresses-list" id="addresses-list"></div>
           <details class="account-details" id="address-details">
-            <summary>Adicionar ou editar endereco</summary>
+            <summary>Adicionar ou editar endereço</summary>
             <form id="address-form">
               <input name="address_id" type="hidden" />
               <div class="form-grid two-columns">
@@ -160,7 +165,7 @@
               </div>
               <label>Rua<input name="street" required /></label>
               <div class="form-grid two-columns">
-                <label>Numero<input name="number" required /></label>
+                <label>Número<input name="number" required /></label>
                 <label>Bairro<input name="neighborhood" required /></label>
               </div>
               <div class="form-grid two-columns">
@@ -169,11 +174,11 @@
               </div>
               <label class="checkbox-label">
                 <input name="is_default" type="checkbox" />
-                Usar como endereco principal
+                Usar como endereço principal
               </label>
               <div class="button-row">
-                <button class="primary-button" type="submit">Salvar endereco</button>
-                <button class="ghost-button hidden" id="cancel-address-edit" type="button">Cancelar edicao</button>
+                <button class="primary-button" type="submit">Salvar endereço</button>
+                <button class="ghost-button hidden" id="cancel-address-edit" type="button">Cancelar edição</button>
               </div>
             </form>
           </details>
@@ -182,16 +187,16 @@
         <section class="panel compact-panel">
           <div class="panel-heading">
             <div>
-              <h2>Preferencias</h2>
+              <h2>Preferências</h2>
               <p>Gostos e canais preferidos.</p>
             </div>
           </div>
           <details class="account-details" open>
-            <summary>Editar preferencias</summary>
+            <summary>Editar preferências</summary>
             <form id="preferences-form">
               <label>Contato preferido
                 <select name="preferred_contact">
-                  <option value="">Sem preferencia</option>
+                  <option value="">Sem preferência</option>
                   <option value="whatsapp">WhatsApp</option>
                   <option value="email">Email</option>
                   <option value="phone">Telefone</option>
@@ -204,27 +209,29 @@
                 <label class="checkbox-label"><input name="favorite_categories" value="sobremesas" type="checkbox" /> Sobremesas</label>
                 <label class="checkbox-label"><input name="favorite_categories" value="presentes" type="checkbox" /> Presentes</label>
               </fieldset>
-              <label>Restricoes ou observacoes alimentares
+              <label>Restrições ou observações alimentares
                 <input name="dietary_restrictions" placeholder="sem lactose, sem acucar" />
               </label>
               <label class="checkbox-label">
                 <input name="accepts_promotions" type="checkbox" />
-                Quero receber promocoes
+                Quero receber promoções
               </label>
               <label class="checkbox-label">
                 <input name="accepts_whatsapp" type="checkbox" />
                 Aceito atendimento por WhatsApp
               </label>
-              <label>Notas de preferencia<textarea name="notes" rows="3"></textarea></label>
-              <button class="primary-button" type="submit">Salvar preferencias</button>
+              <label>Notas de preferência<textarea name="notes" rows="3"></textarea></label>
+              <button class="primary-button" type="submit">Salvar preferências</button>
             </form>
           </details>
         </section>
-      </aside>
+      </div></details>
     </main>
+<dialog id="customer-order-dialog" aria-labelledby="customer-order-title"><div class="dialog-heading"><h2 id="customer-order-title">Pedido</h2><button id="close-customer-order" type="button" aria-label="Fechar pedido">×</button></div><div id="customer-order-content"></div></dialog>
 
     <script src="../config.js?v=config-20260710-1"></script>
-    <script src="./app.js?v=profile-20260710-1"></script>
+    <script src="../ui.js?v=20260908"></script>
+    <script src="./app.js?v=premium-20260908"></script>
     <script src="../contact-widget.js?v=contact-20260710-1"></script>
   </body>
 </html>

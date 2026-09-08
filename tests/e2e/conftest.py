@@ -46,6 +46,7 @@ def page(browser):
         timezone_id="America/Sao_Paulo",
     )
     page = context.new_page()
+    page.on("pageerror", lambda error: print(f"Browser error: {error}"))
     try:
         yield page
     finally:

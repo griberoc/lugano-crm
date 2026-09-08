@@ -4,13 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Lugano | Admin</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../design-system.css?v=heritage-20260709-1" />
     <link rel="stylesheet" href="./styles.css?v=admin-20260709-1" />
+    <link rel="stylesheet" href="../premium.css?v=20260908" />
   </head>
-  <body>
+  <body class="premium module-admin">
     <section class="admin-login-gate" id="admin-login-gate">
       <div class="login-intro">
         <div class="login-brand">
@@ -21,7 +19,7 @@
           </div>
         </div>
         <div class="login-copy">
-          <span>Operacao Lugano</span>
+          <span>Operação Lugano</span>
           <h1>Portal administrativo</h1>
           <p>Acesso restrito da equipe.</p>
         </div>
@@ -59,12 +57,12 @@
         </div>
 
         <nav class="nav-tabs" aria-label="Modulos">
-          <button class="nav-tab active" data-view="overview" type="button">Visao Geral</button>
+          <button class="nav-tab active" data-view="overview" type="button">Visão Geral</button>
           <button class="nav-tab" data-view="orders" type="button">Pedidos</button>
           <button class="nav-tab" data-view="products" type="button">Produtos</button>
           <button class="nav-tab" data-view="customers" type="button">Clientes</button>
           <button class="nav-tab" data-min-role="manager" data-view="promotions" type="button">Campanhas</button>
-          <button class="nav-tab" data-min-role="manager" data-view="reports" type="button">Relatorios</button>
+          <button class="nav-tab" data-min-role="manager" data-view="reports" type="button">Relatórios</button>
           <button class="nav-tab" data-min-role="owner" data-view="audit" type="button">Auditoria</button>
           <button class="nav-tab" data-min-role="owner" data-view="team" type="button">Equipe</button>
           <button class="nav-tab" data-view="settings" type="button">Acesso</button>
@@ -74,8 +72,8 @@
       <main class="workspace">
         <header class="topbar">
           <div>
-            <h1 id="view-title">Visao Geral</h1>
-            <p id="view-subtitle">Operacao comercial, pedidos e campanhas.</p>
+            <h1 id="view-title">Visão Geral</h1>
+            <p id="view-subtitle">Operação comercial, pedidos e campanhas.</p>
           </div>
           <div class="connection-pill" id="connection-status">Aguardando acesso</div>
         </header>
@@ -166,7 +164,7 @@
             <section class="panel order-detail-panel" id="order-detail">
               <div class="empty-state">
                 <h2>Selecione um pedido</h2>
-                <p>Veja itens, cliente, entrega, observacoes e atualize o status.</p>
+                <p>Veja itens, cliente, entrega, observações e atualize o status.</p>
               </div>
             </section>
           </div>
@@ -178,16 +176,16 @@
               <h2>Novo produto</h2>
               <label>Nome<input name="name" required /></label>
               <label>Categoria<input name="category" value="cafeteria" required /></label>
-              <label>Preco<input name="price" type="number" step="0.01" min="0" required /></label>
-              <label>Descricao<textarea name="description" rows="3"></textarea></label>
+              <label>Preço<input name="price" type="number" step="0.01" min="0" required /></label>
+              <label>Descrição<textarea name="description" rows="3"></textarea></label>
               <label>Imagem URL<input name="image_url" /></label>
-              <label class="check-row"><input name="available" type="checkbox" checked /> Disponivel</label>
+              <label class="check-row"><input name="available" type="checkbox" checked /> Disponível</label>
               <button class="primary-button" type="submit">Salvar produto</button>
             </form>
 
             <section class="panel">
               <div class="panel-heading">
-                <h2>Catalogo</h2>
+                <h2>Catálogo</h2>
                 <button class="ghost-button" data-refresh="products" type="button">Atualizar</button>
               </div>
               <div class="item-list" id="products-list"></div>
@@ -221,18 +219,18 @@
           <div class="split-layout">
             <form class="panel form-panel" id="promotion-form">
               <h2>Nova campanha</h2>
-              <label>Codigo<input name="code" required /></label>
+              <label>Código<input name="code" required /></label>
               <label>Tipo
                 <select name="type">
                   <option value="percentage">Percentual</option>
                   <option value="fixed">Valor fixo</option>
-                  <option value="free_delivery">Frete gratis</option>
+                  <option value="free_delivery">Frete grátis</option>
                 </select>
               </label>
               <label>Valor<input name="value" type="number" step="0.01" min="0" value="0" /></label>
-              <label>Pedido minimo (centavos)<input name="min_order_cents" type="number" min="0" value="0" /></label>
+              <label>Pedido mínimo (centavos)<input name="min_order_cents" type="number" min="0" value="0" /></label>
               <label>Limite de usos<input name="max_uses" type="number" min="1" /></label>
-              <label>Descricao<textarea name="description" rows="3"></textarea></label>
+              <label>Descrição<textarea name="description" rows="3"></textarea></label>
               <label class="check-row"><input name="active" type="checkbox" checked /> Ativa</label>
               <button class="primary-button" type="submit">Salvar campanha</button>
             </form>
@@ -250,21 +248,21 @@
         <section class="view" data-min-role="manager" id="view-reports">
           <form class="panel report-filters" id="reports-filter-form">
             <div>
-              <h2>Periodo</h2>
+              <h2>Período</h2>
               <p class="muted">Filtre faturamento, tickets e rankings comerciais.</p>
             </div>
-            <label>Inicio<input name="date_from" type="date" /></label>
+            <label>Início<input name="date_from" type="date" /></label>
             <label>Fim<input name="date_to" type="date" /></label>
-            <button class="primary-button" type="submit">Atualizar relatorios</button>
+            <button class="primary-button" type="submit">Atualizar relatórios</button>
           </form>
 
           <section class="metrics-grid reports-metrics">
             <article class="metric">
-              <span>Faturamento liquido</span>
+              <span>Faturamento líquido</span>
               <strong id="report-net-revenue">R$ 0,00</strong>
             </article>
             <article class="metric">
-              <span>Ticket medio</span>
+              <span>Ticket médio</span>
               <strong id="report-average-ticket">R$ 0,00</strong>
             </article>
             <article class="metric">
@@ -392,9 +390,9 @@
               <label>ID do usuario<input name="profile_id" placeholder="UUID do Supabase Auth" required /></label>
               <label>Papel
                 <select name="role">
-                  <option value="staff">Staff</option>
-                  <option value="manager">Manager</option>
-                  <option value="owner">Owner</option>
+                  <option value="staff">Atendente</option>
+                  <option value="manager">Gerente</option>
+                  <option value="owner">Proprietário</option>
                 </select>
               </label>
               <label class="check-row"><input name="active" type="checkbox" checked /> Ativo</label>
@@ -428,7 +426,7 @@
           <div class="settings-grid">
             <section class="panel settings-panel">
               <div class="panel-heading">
-                <h2>Sessao administrativa</h2>
+                <h2>Sessão administrativa</h2>
                 <span class="status" id="admin-session-label">Desconectado</span>
               </div>
               <div class="session-summary">
@@ -449,6 +447,7 @@
     </div>
 
     <script src="../config.js?v=config-20260703-1"></script>
-    <script src="./app.js?v=admin-20260709-1"></script>
+    <script src="../ui.js?v=20260908"></script>
+    <script src="./app.js?v=premium-20260908"></script>
   </body>
 </html>

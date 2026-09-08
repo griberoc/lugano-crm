@@ -4,13 +4,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Lugano | Acesso</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../design-system.css?v=heritage-20260710-1" />
     <link rel="stylesheet" href="./styles.css?v=auth-route-20260709-1" />
+    <link rel="stylesheet" href="../premium.css?v=20260908" />
   </head>
-  <body>
+  <body class="premium module-auth">
+    <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+    <header class="shop-header">
+      <a class="shop-brand" href="../orders/"><img src="../assets/lugano-logo-mark.svg" width="40" height="40" alt=""><span>Lugano<small>CAFETERIA &amp; CHOCOLATERIA</small></span></a>
+      <nav aria-label="Navegação principal"><a href="../orders/">Cardápio</a><a href="../customer/">Minha Lugano</a></nav>
+      <div class="shop-session"><div class="session-actions">
+          <span id="session-label">Visitante</span>
+          <button class="ghost-button hidden" id="logout-button" type="button">Sair</button>
+        </div></div>
+    </header>
     <header class="auth-hero">
       <nav class="topnav">
         <a class="brand" href="../landing/index.html">
@@ -20,25 +27,22 @@
             <small>Acesso do Cliente</small>
           </span>
         </a>
-        <div class="session-actions">
-          <span id="session-label">Visitante</span>
-          <button class="ghost-button hidden" id="logout-button" type="button">Sair</button>
-        </div>
+
       </nav>
       <div class="hero-copy">
         <span>Conta Lugano</span>
         <h1>Entre ou crie sua conta.</h1>
-        <p>Acesse seu painel, acompanhe beneficios e finalize pedidos no delivery.</p>
+        <p>Acesse seu painel, acompanhe benefícios e finalize pedidos no delivery.</p>
       </div>
     </header>
 
-    <main class="auth-layout">
+    <main id="main-content" tabindex="-1" class="auth-layout">
       <section class="auth-card">
         <div class="notice hidden" id="notice"></div>
 
         <div class="auth-tabs" role="tablist" aria-label="Acesso do cliente">
-          <button class="auth-tab active" id="show-login" type="button">Entrar</button>
-          <button class="auth-tab" id="show-signup" type="button">Criar conta</button>
+          <button class="auth-tab active" id="show-login" role="tab" aria-selected="true" aria-controls="login-form" type="button">Entrar</button>
+          <button class="auth-tab" id="show-signup" role="tab" aria-selected="false" aria-controls="signup-form" type="button">Criar conta</button>
         </div>
 
         <form id="login-form">
@@ -54,7 +58,7 @@
         <form class="hidden" id="signup-form">
           <div>
             <h2>Criar conta</h2>
-            <p>Seu cadastro libera pedidos, pontos e promocoes do programa.</p>
+            <p>Seu cadastro libera pedidos, pontos e promoções do programa.</p>
           </div>
           <label>Nome<input name="full_name" autocomplete="name" required /></label>
           <label>Telefone<input name="phone" autocomplete="tel" /></label>
@@ -65,11 +69,11 @@
         </form>
 
         <section class="session-panel" id="session-panel">
-          <h2>Sessao atual</h2>
+          <h2>Sessão atual</h2><button type="button" class="ghost-button mobile-only" data-logout-session>Sair da conta</button>
           <p id="session-summary">Nenhuma conta conectada.</p>
           <div class="quick-actions">
-            <a class="ghost-link" href="../client/#/painel" target="_top">Abrir painel</a>
-            <a class="ghost-link" href="../client/#/delivery" target="_top">Fazer pedido</a>
+            <a class="ghost-link" href="../customer/" target="_top">Abrir painel</a>
+            <a class="ghost-link" href="../orders/" target="_top">Fazer pedido</a>
           </div>
         </section>
       </section>
@@ -78,17 +82,18 @@
         <section class="panel">
           <h2>O que essa conta libera?</h2>
           <ul>
-            <li>Acompanhar ultimos pedidos.</li>
+            <li>Acompanhar últimos pedidos.</li>
             <li>Participar do programa de fidelidade.</li>
-            <li>Receber promocoes disponiveis para seu nivel.</li>
-            <li>Salvar enderecos para o delivery.</li>
+            <li>Receber promoções disponíveis para seu nível.</li>
+            <li>Salvar endereços para o delivery.</li>
           </ul>
         </section>
       </aside>
     </main>
 
     <script src="../config.js?v=config-20260710-1"></script>
-    <script src="./app.js?v=auth-route-20260710-1"></script>
+    <script src="../ui.js?v=20260908"></script>
+    <script src="./app.js?v=premium-20260908"></script>
     <script src="../contact-widget.js?v=contact-20260710-1"></script>
   </body>
 </html>

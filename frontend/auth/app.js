@@ -15,17 +15,12 @@ const state = {
   apiBaseUrl: DEFAULT_API_URL,
   supabaseUrl: DEFAULT_SUPABASE_URL,
   supabaseAnonKey: DEFAULT_SUPABASE_ANON_KEY,
-  session: JSON.parse(localStorage.getItem("lugano.customer.session") || "null"),
+  session: LuganoUI.read("lugano.customer.session"),
 };
 
 const $ = (selector) => document.querySelector(selector);
 
-function showNotice(message, type = "info") {
-  const notice = $("#notice");
-  notice.textContent = message;
-  notice.classList.remove("hidden", "error");
-  if (type === "error") notice.classList.add("error");
-}
+function showNotice(message,type="info") { LuganoUI.notice($("#notice"),message,type); LuganoUI.toast(message,type); }
 
 function formData(form) {
   const data = Object.fromEntries(new FormData(form).entries());
@@ -40,9 +35,10 @@ function saveSession() {
 }
 
 function notifySessionChanged() {
-  if (window.parent && window.parent !== window) {
-    window.parent.postMessage({ type: "lugano.customer.session.changed" }, window.location.origin);
-  }
+ if(!state.session)return;
+ const route=localStorage.getItem("lugano.customer.returnAfterLogin");
+ localStorage.removeItem("lugano.customer.returnAfterLogin");
+ location.assign(route === "delivery" ? "../orders/" : "../customer/");
 }
 
 function authHeaders() {
@@ -51,30 +47,7 @@ function authHeaders() {
     : {};
 }
 
-async function api(path, options = {}) {
-  const response = await fetch(`${state.apiBaseUrl}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeaders(),
-      ...(options.headers || {}),
-    },
-  });
-
-  if (!response.ok) {
-    let detail = response.statusText;
-    try {
-      const body = await response.json();
-      detail = body.detail || JSON.stringify(body);
-    } catch {
-      detail = await response.text();
-    }
-    throw new Error(detail);
-  }
-
-  if (response.status === 204) return null;
-  return response.json();
-}
+async function api(path, options = {}) { return LuganoUI.request(state.apiBaseUrl + path,{...options, headers:{"Content-Type":"application/json",...authHeaders(),...(options.headers || {})}}); }
 
 function setAuthMode(mode) {
   const isSignup = mode === "signup";
@@ -82,31 +55,23 @@ function setAuthMode(mode) {
   $("#signup-form").classList.toggle("hidden", !isSignup);
   $("#show-login").classList.toggle("active", !isSignup);
   $("#show-signup").classList.toggle("active", isSignup);
+  $("#show-login").setAttribute("aria-selected",String(!isSignup));
+  $("#show-login").tabIndex=isSignup ? -1 : 0;
+  $("#show-signup").tabIndex=isSignup ? 0 : -1;
+  $("#show-signup").setAttribute("aria-selected",String(isSignup));
 }
 
 function requireSupabaseConfig() {
   if (!state.supabaseUrl || !state.supabaseAnonKey) {
-    showNotice("Nao foi possivel iniciar o acesso. Configuracao publica ausente.", "error");
+    showNotice("O acesso está temporariamente indisponível. Tente novamente em instantes.", "error");
     return false;
   }
   return true;
 }
 
-async function supabaseAuth(path, payload) {
-  const response = await fetch(`${state.supabaseUrl}/auth/v1/${path}`, {
-    method: "POST",
-    headers: {
-      apikey: state.supabaseAnonKey,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error(body.msg || body.message || body.error_description || "Falha na autenticacao.");
-  }
-  return body;
+async function supabaseAuth(path,payload) {
+ try { return await LuganoUI.request(state.supabaseUrl + "/auth/v1/" + path,{method:"POST",headers:{apikey:state.supabaseAnonKey,"Content-Type":"application/json"},body:JSON.stringify(payload)}); }
+ catch(error) { if(error.status===400 || error.status===401)throw new Error(path.startsWith("token") ? "Email ou senha incorretos. Confira e tente novamente." : "Não foi possível cadastrar estes dados. Confira o email e os requisitos da senha."); throw error; }
 }
 
 function sessionFromAuthResponse(body) {
@@ -127,6 +92,7 @@ function renderSession() {
     ? `Conta conectada: ${email}`
     : "Nenhuma conta conectada.";
   $("#logout-button").classList.toggle("hidden", !state.session);
+  $("#session-panel").classList.toggle("hidden", !state.session);
 }
 
 async function login(event) {
@@ -155,7 +121,9 @@ async function signup(event) {
   if (!requireSupabaseConfig()) return;
 
   if (data.password !== data.password_confirm) {
-    showNotice("As senhas nao conferem.", "error");
+    form.elements.password_confirm.setCustomValidity("As senhas não conferem.");
+    form.elements.password_confirm.reportValidity();
+    showNotice("As senhas não conferem.", "error");
     return;
   }
 
@@ -197,21 +165,28 @@ async function signup(event) {
 
     showNotice("Conta criada e conectada.");
   } catch (error) {
-    showNotice(`Nao foi possivel criar a conta. ${error.message}`, "error");
+    showNotice(`Não foi possível criar a conta. ${error.message}`, "error");
   }
 }
 
 function logout() {
+  sessionStorage.removeItem("lugano.address.draft"); sessionStorage.removeItem("lugano.checkout.draft");
   state.session = null;
   saveSession();
   notifySessionChanged();
   renderSession();
-  showNotice("Sessao encerrada.");
+  showNotice("Sessão encerrada.");
 }
 
 function bindEvents() {
-  $("#login-form").addEventListener("submit", login);
-  $("#signup-form").addEventListener("submit", signup);
+  $("#login-form").addEventListener("submit", event => { event.preventDefault(); LuganoUI.busy(event.currentTarget.querySelector("button"),"Entrando…",() => login(event)); });
+  $("#signup-form").addEventListener("submit", event => { event.preventDefault(); LuganoUI.busy(event.currentTarget.querySelector("button"),"Criando conta…",() => signup(event)); });
+  $(".auth-tabs").addEventListener("keydown",event=>{
+    if(!["ArrowLeft","ArrowRight","Home","End"].includes(event.key))return;
+    event.preventDefault(); const signup=event.key==="End" || (event.key!=="Home" && $("#show-login").getAttribute("aria-selected")==="true");
+    setAuthMode(signup?"signup":"login");$(signup?"#show-signup":"#show-login").focus();
+  });
+  $("#signup-form").elements.password_confirm.addEventListener("input",event=>event.target.setCustomValidity(""));
   $("#show-login").addEventListener("click", () => setAuthMode("login"));
   $("#show-signup").addEventListener("click", () => setAuthMode("signup"));
   $("#logout-button").addEventListener("click", logout);

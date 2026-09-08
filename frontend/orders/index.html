@@ -4,13 +4,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Lugano | Delivery</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../design-system.css?v=heritage-20260710-1" />
     <link rel="stylesheet" href="./styles.css?v=checkout-20260709-1" />
+    <link rel="stylesheet" href="../premium.css?v=20260908" />
   </head>
-  <body>
+  <body class="premium module-orders">
+    <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+    <header class="shop-header">
+      <a class="shop-brand" href="../orders/"><img src="../assets/lugano-logo-mark.svg" width="40" height="40" alt=""><span>Lugano<small>CAFETERIA &amp; CHOCOLATERIA</small></span></a>
+      <nav aria-label="Navegação principal"><a href="../orders/" aria-current="page">Cardápio</a><a href="../customer/">Minha Lugano</a></nav>
+      <div class="shop-session"><div class="nav-session">
+          <span id="session-label">Visitante</span>
+          <button class="ghost-button hidden" id="logout-button" type="button">Sair</button>
+        </div></div>
+    </header>
     <header class="page-hero compact-hero">
       <nav class="nav">
         <a class="brand" href="../landing/index.html">
@@ -20,45 +27,19 @@
             <small>Delivery</small>
           </span>
         </a>
-        <div class="nav-session">
-          <span id="session-label">Visitante</span>
-          <button class="ghost-button hidden" id="logout-button" type="button">Sair</button>
-        </div>
+
       </nav>
 
-      <div class="hero-copy">
-        <span>Delivery Lugano</span>
-        <h1>Cafe, chocolate e sobremesa a caminho.</h1>
-        <p>Escolha seus favoritos e finalize em uma trilha simples.</p>
-        <div class="delivery-hero-actions">
-          <a href="#product-grid">Ver cardapio</a>
-          <a href="#step-cart">Meu pedido</a>
-        </div>
-      </div>
-    </header>
+      <div class="hero-copy shop-intro"><div><span>Feito para o seu momento</span><h1>Uma pausa com sabor.</h1><p>Cafés, chocolates e pequenos prazeres. Escolha o seu.</p></div><div class="store-detail"><strong>Lugano · São Luís</strong><span>Delivery • Frete calculado no carrinho</span></div></div></header>
 
-    <main class="delivery-layout">
+    <main id="main-content" tabindex="-1" class="delivery-layout">
       <section class="menu-column">
         <div class="notice hidden" id="notice"></div>
 
-        <section class="menu-heading menu-stage">
-          <div>
-            <span class="section-kicker">Cardapio delivery</span>
-            <h2>Monte seu pedido</h2>
-            <p>Cafes, chocolates e sobremesas preparados para entrega.</p>
-          </div>
-          <div class="toolbar">
-            <select id="category-filter" aria-label="Filtrar categoria">
-              <option value="">Todas as categorias</option>
-            </select>
-            <button class="ghost-button" id="refresh-products" type="button">Atualizar</button>
-          </div>
-        </section>
-
-        <div class="product-grid" id="product-grid"></div>
+        <section class="menu-tools" aria-label="Encontrar produtos"><label class="search-box"><span class="sr-only">Buscar no cardápio</span><input id="product-search" type="search" placeholder="O que combina com a sua pausa?" autocomplete="off"></label><select id="category-filter" class="sr-only" aria-label="Filtrar categoria"><option value="">Todas as categorias</option></select><div id="category-tabs" class="category-tabs" aria-label="Categorias"></div></section><div class="menu-title"><h2>Nosso cardápio</h2><button class="ghost-button" id="refresh-products" type="button" aria-label="Atualizar cardápio">Atualizar</button></div><div class="product-grid" id="product-grid"></div>
       </section>
 
-      <aside class="checkout-column" aria-label="Checkout do delivery">
+      <aside class="checkout-column" aria-label="Checkout do delivery"><div class="checkout-heading"><h2>Seu pedido</h2><button class="ghost-button" id="back-to-menu" type="button">Cardápio</button></div>
         <section class="checkout-progress" aria-label="Etapas do pedido">
           <div class="flow-step active" id="flow-cart">
             <span>1</span>
@@ -93,9 +74,9 @@
             <div><span>Desconto</span><strong id="cart-discount">R$ 0,00</strong></div>
             <div class="grand-total"><span>Total estimado</span><strong id="cart-total">R$ 0,00</strong></div>
           </div>
-          <p class="checkout-note" id="free-delivery-hint"></p>
+          <p class="checkout-note" id="free-delivery-hint"></p><button class="ghost-button hidden" id="retry-quote" type="button">Recalcular frete</button>
           <div class="step-actions">
-            <button class="ghost-button" data-go-step="step-account" type="button">Continuar</button>
+            <button class="primary-button" data-go-step="step-account" type="button">Continuar</button>
           </div>
         </section>
 
@@ -108,7 +89,7 @@
             </div>
           </div>
           <p class="muted" id="auth-summary">Nenhuma conta conectada.</p>
-          <a class="primary-button" href="../client/#/acesso" target="_top" data-return-after-login="delivery">Ir para Acesso</a>
+          <a class="primary-button" href="../auth/" target="_top" data-return-after-login="delivery">Entrar para continuar</a><button class="ghost-button" data-go-step="step-cart" type="button">Voltar ao carrinho</button>
         </section>
 
         <section class="checkout-panel step-panel" id="step-delivery">
@@ -116,28 +97,28 @@
             <span class="step-index">3</span>
             <div>
               <h2>Entrega</h2>
-              <p>Endereco e observacoes</p>
+              <p>Endereço e observações</p>
             </div>
           </div>
-          <label>Endereco salvo
+          <label>Endereço salvo
             <select id="address-select" aria-label="Endereco de entrega"></select>
           </label>
-          <p class="selection-summary" id="address-summary">Selecione ou cadastre um endereco.</p>
+          <p class="selection-summary" id="address-summary">Selecione ou cadastre um endereço.</p>
           <details>
-            <summary>Novo endereco</summary>
+            <summary>Novo endereço</summary>
             <form id="address-form">
               <label>Apelido<input name="label" value="Casa" required /></label>
               <label>Rua<input name="street" required /></label>
-              <label>Numero<input name="number" required /></label>
+              <label>Número<input name="number" required /></label>
               <label>Bairro<input name="neighborhood" required /></label>
               <label>Cidade<input name="city" required /></label>
               <label>CEP<input name="zip_code" required /></label>
               <label>Complemento<input name="complement" /></label>
-              <button class="ghost-button" type="submit">Salvar endereco</button>
+              <button class="ghost-button" type="submit">Salvar endereço</button>
             </form>
           </details>
           <div class="step-actions">
-            <button class="ghost-button" data-go-step="step-payment" type="button">Continuar</button>
+            <button class="ghost-button" data-go-step="step-cart" type="button">Voltar</button><button class="primary-button" data-go-step="step-payment" type="button">Continuar</button>
           </div>
         </section>
 
@@ -149,7 +130,7 @@
               <p>Cupom e forma de pagamento</p>
             </div>
           </div>
-          <label>Cupom<input id="promotion-code" placeholder="LUGANO10" /></label>
+          <button class="ghost-button" data-go-step="step-delivery" type="button">Editar entrega</button><label>Cupom<input id="promotion-code" placeholder="LUGANO10" /></label>
           <div class="button-row">
             <button class="ghost-button" id="validate-promotion" type="button">Aplicar cupom</button>
             <button class="ghost-button" id="clear-promotion" type="button">Remover</button>
@@ -158,13 +139,13 @@
           <label>Forma de pagamento
             <select id="payment-method">
               <option value="pix">Pix</option>
-              <option value="credit_card">Cartao de credito</option>
-              <option value="debit_card">Cartao de debito</option>
+              <option value="credit_card">Cartão de crédito</option>
+              <option value="debit_card">Cartão de débito</option>
               <option value="cash">Dinheiro</option>
             </select>
           </label>
           <p class="selection-summary" id="payment-summary">Pagamento via Pix.</p>
-          <label>Observacoes<textarea id="order-notes" rows="3"></textarea></label>
+          <label>Observações<textarea id="order-notes" rows="3"></textarea></label>
           <button class="primary-button checkout-button" id="checkout-button" type="button">
             Revisar pedido
           </button>
@@ -193,24 +174,14 @@
               <button class="ghost-button" id="copy-pix" type="button">Copiar Pix</button>
             </div>
           </div>
-          <div class="order-progress" id="order-progress"></div>
+          <div class="order-progress" id="order-progress"></div><p id="order-refresh-message" role="status"></p><button id="refresh-order" class="ghost-button" type="button">Atualizar pedido</button><a class="ghost-button" href="../customer/">Ver meus pedidos</a><p class="checkout-trust">Acompanhe aqui a confirmação do pagamento e o preparo.</p>
         </section>
       </aside>
     </main>
 
-    <a
-      class="floating-access-button hidden"
-      href="../client/#/acesso"
-      id="floating-access-button"
-      target="_top"
-      data-return-after-login="delivery"
-      aria-label="Ir para acesso do cliente"
-    >
-      <span>Cliente</span>
-      <strong>Ir para acesso</strong>
-    </a>
+    <button class="primary-button mobile-cart hidden" id="mobile-cart" type="button"><span>Ver carrinho</span><strong id="mobile-cart-total"></strong></button>
 
-    <div class="modal-backdrop hidden" id="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <dialog id="confirm-dialog" aria-labelledby="confirm-title">
       <section class="confirm-modal">
         <h2 id="confirm-title">Confirmar pedido</h2>
         <div class="confirm-list" id="confirm-summary"></div>
@@ -219,10 +190,11 @@
           <button class="primary-button" id="confirm-order" type="button">Confirmar e enviar</button>
         </div>
       </section>
-    </div>
-
+    </dialog>
+<dialog id="product-dialog" aria-labelledby="product-dialog-title"><div class="dialog-heading"><h2 id="product-dialog-title">Produto</h2><button id="close-product" type="button" aria-label="Fechar produto">×</button></div><div id="product-dialog-content"></div><label>Quantidade<input id="product-quantity" type="number" min="1" max="99" value="1"></label><label>Observação do item<textarea id="product-note" maxlength="500" rows="2" placeholder="Algum cuidado no preparo?"></textarea></label><div class="dialog-actions"><button id="add-product-detail" class="primary-button" type="button">Adicionar ao pedido</button></div></dialog>
     <script src="../config.js?v=config-20260710-1"></script>
-    <script src="./app.js?v=checkout-20260821-mp-security-1"></script>
+    <script src="../ui.js?v=20260908"></script>
+    <script src="./app.js?v=premium-20260908"></script>
     <script src="../contact-widget.js?v=contact-20260710-1"></script>
   </body>
 </html>

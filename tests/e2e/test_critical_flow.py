@@ -234,30 +234,33 @@ def test_customer_and_admin_critical_flow(
     expect(page.get_by_role("heading", name="Lugano Sao Luis")).to_be_visible()
 
     page.goto(f"{frontend_url}/client/#/delivery")
-    delivery = page.frame_locator("#module-frame")
+    delivery = page
     delivery.get_by_role("button", name="Adicionar").click()
-    expect(delivery.locator("#cart-count")).to_have_text("1 itens")
-    delivery.get_by_role("button", name="Continuar").first.click()
-    delivery.get_by_role("link", name="Ir para Acesso").click()
+    expect(delivery.locator("#cart-count")).to_have_text("1 item")
+    if viewport["width"] < 700:
+        delivery.locator("#mobile-cart").click()
+    delivery.get_by_role("button", name="Continuar", exact=True).first.click()
+    delivery.get_by_role("link", name="Entrar para continuar").click()
 
-    access = page.frame_locator("#module-frame")
+    access = page
     access.locator("#login-form input[name=email]").fill("cliente.e2e@example.test")
     access.locator("#login-form input[name=password]").fill("senha-e2e")
     access.locator("#login-form").get_by_role("button", name="Entrar").click()
-    page.wait_for_url("**/#/delivery")
+    page.wait_for_url("**/orders/")
 
-    delivery = page.frame_locator("#module-frame")
-    expect(delivery.locator("#cart-count")).to_have_text("1 itens")
-    delivery.get_by_text("Novo endereco", exact=True).click()
+    delivery = page
+    expect(delivery.locator("#cart-count")).to_have_text("1 item")
+    delivery.get_by_text("Novo endereço", exact=True).click()
     delivery.locator("#address-form input[name=street]").fill("Rua das Flores")
     delivery.locator("#address-form input[name=number]").fill("120")
     delivery.locator("#address-form input[name=neighborhood]").fill("Centro")
     delivery.locator("#address-form input[name=city]").fill("Gramado")
     delivery.locator("#address-form input[name=zip_code]").fill("95670-000")
     delivery.locator("#address-form").get_by_role(
-        "button", name="Salvar endereco"
+        "button", name="Salvar endereço"
     ).click()
     expect(delivery.locator("#address-summary")).to_contain_text("Rua das Flores")
+    delivery.locator("#step-delivery").get_by_role("button", name="Continuar", exact=True).click()
     delivery.locator("#promotion-code").fill("LUGANO10")
     delivery.locator("#validate-promotion").click()
     expect(delivery.locator("#promotion-summary")).to_contain_text("10%")
@@ -272,12 +275,12 @@ def test_customer_and_admin_critical_flow(
         "button", name="Entrar no painel"
     ).click()
     page.get_by_role("button", name="Pedidos").click()
-    page.get_by_role("button", name="Confirmado").first.click()
+    page.locator('#orders-queue [data-order-next]').first.click()
     expect(page.locator("#orders-queue")).to_contain_text("Confirmado")
     assert fake_platform["patches"] == 1
 
     page.goto(f"{frontend_url}/client/#/painel")
-    panel = page.frame_locator("#module-frame")
+    panel = page
     expect(panel.locator("#orders-list")).to_contain_text("Confirmado")
     expect(panel.locator("#loyalty-headline")).to_contain_text("30 pontos")
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
@@ -291,5 +294,5 @@ def test_login_error_is_clear(page, frontend_url, fake_platform):
     page.locator("#login-form input[name=password]").fill("senha-incorreta")
     page.locator("#login-form").get_by_role("button", name="Entrar").click()
     expect(page.locator("#notice")).to_contain_text(
-        "Login falhou. Credenciais invalidas"
+        "Email ou senha incorretos"
     )
